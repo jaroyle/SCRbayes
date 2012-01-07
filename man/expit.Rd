@@ -2,10 +2,10 @@
 \alias{expit}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-c%%  ~~function to do ... ~~
+inverse-logit transformation 
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+computes exp(x)/(1+exp(x))
 }
 \usage{
 expit(x)
@@ -13,14 +13,15 @@ expit(x)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+ a real number 
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
+  returns a number between 0 and 1 --
+  the inverse-logit transform of x. %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
 %%  \item{comp2 }{Description of 'comp2'}
