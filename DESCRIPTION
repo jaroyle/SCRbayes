@@ -1,0 +1,9 @@
+Package: SCRbayes
+Type: Package
+Title: What the package does (short line)
+Version: 0.1
+Date: 2012-01-06
+Author: Who wrote it
+Maintainer: Andy Royle <aroyle@usgs.gov>
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
