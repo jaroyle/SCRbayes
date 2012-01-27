@@ -1,4 +1,4 @@
-\\name{make.ss}
+\name{make.ss}
 \alias{make.ss}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -77,8 +77,9 @@ ss.x<-c(ss.x,rep(x[i],length(y)))
 ss.animal<-data.frame(X_coord=ss.x, Y_coord=ss.y, V3=1)
 list(ss.animal=ss.animal)
 }
-
+}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ ~kwd1 }
+
 \keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
