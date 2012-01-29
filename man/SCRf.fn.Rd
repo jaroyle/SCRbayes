@@ -87,6 +87,10 @@ this option is not yet implemented
   \item{Xeff}{
 Xeff=j by k matrix where k=the number of surveys and j=the number of traps.  For each row indicate the amount of survey effort conducted in that trap location during survey k,
 if effort was equal across all surveyed areas Xeff=NULL; 
+If a trap x occasion was not sampled then any value can be used for
+effort because those elements of Xeff will not be extracted for the
+likelihood calculations. (the file "traps" contains information about
+which traps x occasions were sampled, see above). 
 }
   \item{Xsex}{
 Xsex= a vector of length n where n= the number of animals;Xsex[n] is either a zero or 1 indicating the sex of animal [n] in the capture file,
