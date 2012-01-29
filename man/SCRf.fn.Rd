@@ -9,40 +9,65 @@ Estimates density of animals from mark-recapture surveys where individual animal
  and spatial locations of captured animals were recorded.Estimation is conducted in a Bayesian framework.  
 }
 \usage{
-SCRf.fn(ni = 1100, burn = 100, skip = 2, nz = 200, traps = traps1, captures = captures1, statespace = grid900, Msigma = 1, Mb = 0, Msex = 0, Msexsigma = 0, Xd = NULL, Xeff = NULL, Xsex = NULL, coord.scale = 5000, thinstatespace = 1, maxNN = 20, dumprate = 1000)
+SCRf.fn(scrobj,ni = 1100, burn = 100, skip = 2, nz = 200,theta=2, Msigma = 1, Mb = 0, Msex = 0, Msexsigma = 0, Xd = NULL, Xeff = NULL, Xsex = NULL, coord.scale = 5000, thinstatespace = 1, maxNN = 20, dumprate = 1000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{ni}{
-ni=number of iterations
+\item{scrobj}{
+
+  a list of type "scrobj" which has elements "traps",
+  "captures" and "statespace"
+
+traps:
+traps is a matrix containing a seq of numbers (1,2,3....j) where j= the
+number of traps in column 1.  Traps can be cameras, hair snares, or
+centerpoints of grid locations.  In columns two and three of the trap
+matrix are the X and Y or longitude and latitude of the trap locations,
+and the survey dates in columns 4 to column 3+k where k=the number of
+survey dates. Each row of the matrix will contain either a 1 if the trap
+was was open on the survey data or a 0 if the trap was closed.
+Alternately, if survey effort was recorded, each row of the matrix will
+contain an index of survey effort on each date associated with each trap
+j during the specified survey k 
+
+captures: a matrix
+where the number of rows=the number of captures.  Each row contains 3
+columns labeled LOC_ID, ANIMAL_ID, and SO; where LOC_ID =the number of
+the trap where the animal was captured, ANIMAL_ID = the animal's unique
+number (must be a sequence 1,2,,,,number of animals), and SO=the
+sampling occasion on which the capture took place 
+
+statespace: contains the coordinate of potential centers of activity
+including those from outside the trapping area, the statespace is a
+matrix where the X or longitudinal coordinate is in the first column and
+the Y or latitudinal coordinate is in the second column, and HABITAT= to
+1 or 0 is the third column.  The third column indicates whether the
+point defined by the X,Y locations is considered habitat (normally)
+habitat=1; (see function make.ss) 
+
 }
-  \item{burn}{
-burn=the number of iterations that are considered "burn-in" and will be discarded from the final estimation
-}
-  \item{skip}{
-skip=the number of iterations in a series that will be retained.  Skip=3 will retain every third iteration of the MCMC chain.
-}
-  \item{nz}{
-nz=the number of all zero encounter histories; the number of animals to augment the data with; experimentation with this number is recommended-
-the distribution of the parameter estimate of animal density should not be skewed or "truncated" by the number of augmented animals 
-}
-  \item{traps}{
-traps is a matrix containing a seq of numbers (1,2,3....j) where j= the number of traps in column 1.  Traps can be cameras, hair snares, or centerpoints of grid locations.
-In columns two and three of the trap matrix are the X and Y or longitude and latitude of the trap locations, and the survey dates in columns 4 to column 3+k where
- k=the number of survey dates. Each row of the matrix will contain either a 1 if the trap was was open on the survey data or a 0 if the trap was closed.  Alternately, if survey 
-effort was recorded, each row of the matrix will contain an index of survey effort on each date associated with each trap j during the specified survey k  
-}
-  \item{captures}{
-captures is a matrix where the number of rows=the number of captures.  Each row contains 3 columns labeled LOC_ID, ANIMAL_ID, and SO; where LOC_ID =the number of the trap
-where the animal was captured, ANIMAL_ID = the animal's unique number (must be a sequence 1,2,,,,number of animals), and SO=the sampling occasion on which the capture took
-place
-}
-  \item{statespace}{
-statespace= contains the coordinate of potential centers of activity including those from outside the trapping area,
-the statespace is a matrix where the X or longitudinal coordinate is in the first column and the Y or latitudinal coordinate is in the second column, and HABITAT= to 1 or 0 is the third column.
-The third column indicates whether the point defined by the X,Y locations is considered habitat (normally) habitat=1; (see function make.ss)
-}
-  \item{Msigma}{
+
+\item{ni}{ ni=number of iterations }
+
+\item{burn}{ burn=the number of iterations that are considered "burn-in"
+  and will be discarded from the final estimation }
+
+\item{skip}{ skip=the
+number of iterations in a series that will be retained.  Skip=3 will
+retain every third iteration of the MCMC chain.  }
+
+\item{nz}{ nz=the
+number of all zero encounter histories; the number of animals to augment
+the data with; experimentation with this number is recommended- the
+distribution of the parameter estimate of animal density should not be
+skewed or "truncated" by the number of augmented animals }
+
+\item{theta}{ the exponent parameter of the distance function. theta = 1
+  is exponential; theta=2 is Gaussian; theta = NA then theta is
+  estimated.
+  }
+
+\item{Msigma}{
 Msigma is an indicator variable that =1 if you are estimating the
 spatial model, normally Msigma=1
 }
@@ -131,11 +156,12 @@ Andy Royle
 
 
 data("lions")
+scrobj<-list(traps=traps.lions,captures=captures.lions,statespace=statespace.lions)
+
 test<-
 
-SCRf.fn(ni=220, burn=20,
- skip=2,nz=200,traps=traps.lions, captures=captures.lions, statespace=
- statespace.lions, Msigma=1, Mb=0, Msex=0, Msexsigma=0, Xd=NULL,
+SCRf.fn(scrobj,ni=220, burn=20,
+ skip=2,nz=200,Msigma=1, Mb=0, Msex=0, Msexsigma=0, Xd=NULL,
  Xeff=NULL, Xsex=NULL, thinstatespace=2)
 
 }

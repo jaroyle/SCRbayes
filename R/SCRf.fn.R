@@ -1,7 +1,16 @@
 SCRf.fn <-
-function(ni=1100,burn=100,skip=2,nz=200,traps=traps1,captures=captures1,
-statespace=grid900,Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xd=NULL,Xeff=NULL,Xsex=NULL,
+function(scrobj,
+         ni=1100,burn=100,skip=2,nz=200,theta=NA,
+Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xd=NULL,Xeff=NULL,Xsex=NULL,
 coord.scale=5000,thinstatespace=1,maxNN=20,dumprate=1000){
+
+call <- match.call()
+
+traps<-scrobj$traps
+captures<-scrobj$captures
+statespace<-scrobj$statespace
+
+
 
 # ni = number of iterations, total
 # burn = number to discard
@@ -37,33 +46,6 @@ coord.scale=5000,thinstatespace=1,maxNN=20,dumprate=1000){
 ##################
 ##################
 ##################
-
-checkdata.fn<-function(Y){
-encfreqs<- table(table(Y[,2]))
-totrecaps<- sum(encfreqs*(as.numeric(names(encfreqs)) -1))
-trapfreqs<- table(apply(table(Y[,2],Y[,1])>0,1,sum))
-multitraps<- sum(trapfreqs*(as.numeric(names(trapfreqs))-1))
-c(totrecaps,multitraps)
-}
-## Check minimum data requirements. This is completely arbitrary but
-## it is meant to FORCE the user to proceed AT THEIR OWN RISK knowing
-## that they have limited data and thinking about the potential consequences
-
-smydata<-checkdata.fn(Y)
-cat("You had ",smydata[1]," recaptures in your study",fill=TRUE)
-cat("You had ",smydata[2]," multi-trap recaptures in your study",fill=TRUE)
-if( (smydata[1]< 10) | (smydata[2] < 5) ){
- cat("You should go into the field and obtain more data.",fill=TRUE)
- cat("Try again later.",fill=TRUE)
- return(NULL)
-}
-
-##################
-##################
-##################
-##################
-##################
-
 
 statespace<-statespace[seq(1,nrow(statespace),thinstatespace),]
 goodbad<-statespace[,3]
@@ -236,6 +218,12 @@ bsigma<- 1
 if(Msexsigma==1)
 bsigma <-c(3,3)
 
+update.theta<-FALSE
+if(is.na(theta)){
+     theta<- .75
+     update.theta<-TRUE
+ }
+
 loglam0<-log(.018)
 beta<-0
 beta.sex<-0
@@ -270,17 +258,18 @@ c2<- (S[indid,2]-trapgridbig[,2])^2
 gof.new<-gof.data<-rep(NA,(ni-burn)/skip)
 
 out<-matrix(NA,nrow=(ni-burn)/skip,ncol=12)
-dimnames(out)<-list(NULL,c("bsigma","sigma","bsigma2","sigma2","lam0","beta","beta1(effort)","beta.sex","psi","psi.sex","Nsuper","Nin"))
+dimnames(out)<-list(NULL,c("bsigma","sigma","bsigma2","sigma2","lam0","beta","beta1(effort)","beta.sex","psi","psi.sex","Nsuper","theta"))
 zout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 Sout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 m<-1
 
 LM1<-LM2<-matrix(NA,nrow=M,ncol=length(indid)/M)
 ones<-rep(1,ncol(LM1))
+
 if(Msexsigma==0)
-lp.sigma<-Msigma*bsigma*(c1+c2)
+lp.sigma<-Msigma*bsigma*(c1+c2)^theta
 if(Msexsigma==1)
-lp.sigma<-bsigma[Xsex[indid]+1]*(c1+c2)
+lp.sigma<-bsigma[Xsex[indid]+1]*(c1+c2)^theta
 
 acc.count<-0
 delta<-.05
@@ -314,11 +303,45 @@ if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
 }
 
 
+## update theta
+if(update.theta){
+lp<-   loglam0 + Mb*beta*prevcap - lp.sigma + beta1*Xeff + Msex*beta.sex*Xsex[indid]
+thetac<-rnorm(1,theta,.02)  # this is between exponential (.5) and gaussian (1)
+
+if(thetac>=0.5 & thetac<=1){
+if(Msexsigma==0)
+lp.sigmac<-Msigma*bsigma*(c1+c2)^thetac
+if(Msexsigma==1)
+lp.sigmac<-bsigma[Xsex[indid]+1]*(c1 + c2)^thetac
+
+lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+llvector<-lik.fn(lp,y1)
+llvector.new<-lik.fn(lpc,y1)
+LM1[1:length(LM1)]<-llvector.new
+LM2[1:length(LM2)]<- llvector
+if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
+ theta<-thetac
+ lp.sigma<-lp.sigmac
+ llvector<-llvector.new
+ lp<-lpc
+ LM2<-LM1
+}
+}
+
+}
+
+
+
+
+
+
+
+
 ### Update bsigma
 ## do this differently depending on if sigma depends on sex
 if(Msexsigma==0){
 bsigmac<-exp(rnorm(1,log(bsigma),delta))
-lp.sigmac<- Msigma*bsigmac*(c1+c2)
+lp.sigmac<- Msigma*bsigmac*(c1+c2)^theta
 lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lpc,y1)
 LM1[1:length(LM1)]<- llvector.new
@@ -337,7 +360,7 @@ else{
 
 if(Msexsigma==1){
 bsigmac<-c(exp(rnorm(1,log(bsigma[1]),2*delta)),bsigma[2])
-lp.sigmac<- bsigmac[Xsex[indid]+1]*(c1+c2)
+lp.sigmac<- bsigmac[Xsex[indid]+1]*(c1+c2)^theta
 lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lpc,y1)
 LM1[1:length(LM1)]<- llvector.new
@@ -354,7 +377,7 @@ else{
 }
 
 bsigmac<-c(bsigma[1],exp(rnorm(1,log(bsigma[2]),2*delta)))
-lp.sigmac<- bsigmac[Xsex[indid]+1]*(c1+c2)
+lp.sigmac<- bsigmac[Xsex[indid]+1]*(c1+c2)^theta
 lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lpc,y1)
 LM1[1:length(LM1)]<- llvector.new
@@ -452,9 +475,9 @@ tmp.sex<-Xsex
 tmp.sex[sex.naflag]<- 1-Xsex[sex.naflag]
 
 if(Msexsigma==0)
-lp.sigmac<-Msigma*bsigma*(c1+c2)
+lp.sigmac<-Msigma*bsigma*(c1+c2)^theta
 if(Msexsigma==1)
-lp.sigmac<-bsigma[tmp.sex[indid]+1]*(c1+c2)
+lp.sigmac<-bsigma[tmp.sex[indid]+1]*(c1+c2)^theta
 
 lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*tmp.sex[indid]     ## + sex contribution if sex is in the model!
 llvector.new<-lik.fn(lpc,y1)
@@ -469,9 +492,9 @@ Xsex[swtch]<- 1-Xsex[swtch]
 psi.sex<-rbeta(1,.1+sum(Xsex[z==1]),.1+sum(z)-sum(Xsex[z==1]))
 
 if(Msexsigma==0)
-lp.sigma<-Msigma*bsigma*(c1+c2)
+lp.sigma<-Msigma*bsigma*(c1+c2)^theta
 if(Msexsigma==1)
-lp.sigma<-bsigma[Xsex[indid]+1]*(c1+c2)
+lp.sigma<-bsigma[Xsex[indid]+1]*(c1+c2)^theta
 
 lp<-  loglam0 + Mb*beta*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lp,y1)
@@ -499,9 +522,9 @@ c1c<- (Sc[indid,1]-trapgridbig[,1])^2
 c2c<- (Sc[indid,2]-trapgridbig[,2])^2
 
 if(Msexsigma==0)
-lp.sigmac<-Msigma*bsigma*(c1c+c2c)
+lp.sigmac<-Msigma*bsigma*(c1c+c2c)^theta
 if(Msexsigma==1)
-lp.sigmac<-bsigma[Xsex[indid]+1]*(c1c+c2c)
+lp.sigmac<-bsigma[Xsex[indid]+1]*(c1c+c2c)^theta
 lpc<- loglam0+ Mb*beta*prevcap - lp.sigmac + beta1*Xeff + Msex*beta.sex*Xsex[indid]
 
 llvector.new<- lik.fn(lpc,y1)
@@ -522,9 +545,9 @@ LM2[accept,]<-LM1[accept,]
 
 
 if(Msexsigma==0)
-lp.sigma<-Msigma*bsigma*(c1+c2)
+lp.sigma<-Msigma*bsigma*(c1+c2)^theta
 if(Msexsigma==1)
-lp.sigma<-bsigma[Xsex[indid]+1]*(c1+c2)
+lp.sigma<-bsigma[Xsex[indid]+1]*(c1+c2)^theta
 
 lp<-  loglam0 + Mb*beta*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector<- lik.fn(lp,y1)
@@ -577,7 +600,7 @@ gof.new[m]<- sum(  (sqrt(gof.stats[,3])-sqrt(gof.stats[,4]))[z==1]^2)
 zout[m,]<-z
 Sout[m,]<- centers
 out[m,]<-c(bsigmatmp[1],sigmatmp[1],bsigmatmp[2],sigmatmp[2],
-lam0,beta,beta1,beta.sex,psi,psi.sex,sum(z),NA)
+lam0,beta,beta1,beta.sex,psi,psi.sex,sum(z),theta)
 print(out[m,])
 if(m%%dumprate==0){
 #write a file here not implemented yet
@@ -588,8 +611,10 @@ m<-m+1
 
 }
 
+out<- list(out=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout,statespace=statespace,gof.data=gof.data,gof.new=gof.new)
 
-list(out=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout,statespace=statespace,gof.data=gof.data,gof.new=gof.new)
+class(out) <- c("scrfit","list")
 
+return(out)
 
 }
