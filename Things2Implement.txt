@@ -1,0 +1,13 @@
+Class for "scr"
+
+Helper function to screen data
+
+Class for "scrFitBayes"
+
+Goodness-of-fit stuff
+
+Simulator function
+
+
+
+
