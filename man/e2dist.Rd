@@ -2,10 +2,10 @@
 \alias{e2dist}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-cc%%  ~~function to do ... ~~
+cc%% a support function for SCRf.fn, calculates the distances between all points in a grid and a set of locations from within the grid
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+%%  function estimates the euclidian distance between the potential activity centers in the statespace and the observed locations of the captured animals
 }
 \usage{
 e2dist(x, y)
@@ -13,27 +13,25 @@ e2dist(x, y)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+%%     x is a grid or "statespace" of uniform density
 }
   \item{y}{
-%%     ~~Describe \code{y} here~~
+%%    y is a set of capture locations  from within the state space
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+%%  e2dist is used to determine the distance between potential activity centers in the statespace and the observed location of animals from spatial mark-recapture studies
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
+%%   a matrix nrows=the number of rows in grid x and ncols=the number of capture locations.  matrix contains the euclidian distance between the point in the grid and the capture location
+}
 %% ...
 }
 \references{
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+%%  J. Andrew Royle
 }
 \note{
 %%  ~~further notes~~
@@ -48,6 +46,18 @@ e2dist(x, y)
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
 ##--	or do  help(data=index)  for the standard data sets.
+
+x<-seq(1,100, by=10)  ###create a grid called "x"
+y<-seq(1,200, by=10)	
+x.y<-rep(y, length(x))
+x.x<-rep(x[1], length(y))
+
+for (i in 2:length(x))
+{
+x.x<-c(x.x,rep(x[i],length(y)))
+}
+x<-cbind(x.x,x.y)  ### x is a 
+y<-cbind(sample(x[,1],50), sample(x[,1],50))  ##y is a random set of points drawn from x
 
 ## The function is currently defined as
 function (x, y) 
