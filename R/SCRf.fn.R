@@ -201,7 +201,7 @@ numnn<-hld$numnn
 centers1<-rep(NA,nind)
 for(i in 1:nind){
 tt<-t(as.matrix(Yaug[i,,]))
-tt<-col(tt)[tt==1]   # which traps was animal captured in
+tt<-row(tt)[tt==1]   # which traps was animal captured in
 xxx<-traplocs[tt,]  ## coordinates of those traps
 av.coord<-colSums(xxx)/nrow(xxx)
 

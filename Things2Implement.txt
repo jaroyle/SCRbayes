@@ -1,3 +1,5 @@
+change function call from SCRf.fn to scrbayes()
+
 Class for "scr"
 
 Helper function to screen data
