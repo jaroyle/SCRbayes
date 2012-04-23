@@ -25,10 +25,7 @@ centerpoints of grid locations.  In columns two and three of the trap
 matrix are the X and Y or longitude and latitude of the trap locations,
 and the survey dates in columns 4 to column 3+k where k=the number of
 survey dates. Each row of the matrix will contain either a 1 if the trap
-was was open on the survey data or a 0 if the trap was closed.
-Alternately, if survey effort was recorded, each row of the matrix will
-contain an index of survey effort on each date associated with each trap
-j during the specified survey k 
+was operational on the survey date or a 0 if the trap was not operational.
 
 captures: a matrix
 where the number of rows=the number of captures.  Each row contains 3
@@ -85,7 +82,9 @@ Msex sigma is an indicatore variable that = 1 if sigma is to be estimated sepera
 this option is not yet implemented
 }
   \item{Xeff}{
-Xeff=j by k matrix where k=the number of surveys and j=the number of traps.  For each row indicate the amount of survey effort conducted in that trap location during survey k,
+Xeff=j by k matrix where k=the number of surveys and j=the number of traps.  
+For each row indicate the amount of survey effort conducted in that 
+trap location during survey k,
 if effort was equal across all surveyed areas Xeff=NULL; 
 If a trap x occasion was not sampled then any value can be used for
 effort because those elements of Xeff will not be extracted for the

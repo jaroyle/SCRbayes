@@ -202,7 +202,7 @@ centers1<-rep(NA,nind)
 for(i in 1:nind){
 tt<-t(as.matrix(Yaug[i,,]))
 tt<-row(tt)[tt==1]   # which traps was animal captured in
-xxx<-matrix(traplocs[tt,],ncol=2,byrow=FALSE)  ## coordinates of those traps
+xxx<-as.matrix(traplocs[tt,],ncol=2,byrow=FALSE)  ## coordinates of those traps
 av.coord<-colSums(xxx)/nrow(xxx)
 
 dvec<-as.vector(e2dist(matrix(av.coord,ncol=2),G))  # finds closest grid pt
