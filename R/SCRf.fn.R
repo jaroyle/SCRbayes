@@ -11,6 +11,11 @@ captures<-scrobj$captures
 statespace<-scrobj$statespace
 
 
+if(   length(unique(captures[,2])) != length(min(captures[,2]):max(captures[,2])) ) {
+ cat("Error: individuals not numbered sequentially, renumbering them now",fill=TRUE)
+ captures[,2]<- as.numeric(factor(captures[,2]))
+}
+
 
 # ni = number of iterations, total
 # burn = number to discard
@@ -245,10 +250,13 @@ Xsex[sex.naflag]<-rbinom(sum(sex.naflag),1,.65)
 lik.fn<-function(lpc,y1){
 llvector.new<- -1*exp(lpc)
 part2<- exp(exp(lpc[y1])) - 1
-part2[part2==0]<-min(part2[part2!=0])
+part2[part2==0]<-.Machine$double.eps
 llvector.new[y1]<- llvector.new[y1]  + log(part2)
 llvector.new
 }
+
+
+
 
 trapgridbig<-traplocs[trapid,]   # streteches out the trap coord matrix
 y1<-y==1
