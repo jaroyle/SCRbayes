@@ -3,12 +3,12 @@
 \alias{SCRbayes}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+  Bayesian analysis of spatial capture-recapture models.
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+  Bayesian analysis of spatial capture-recapture models with a discrete
+  state-space. The aim of this package is to provide more efficient
+  analysis than WinBUGS/JAGS, at least for a limited class of models. 
 }
 \details{
 \tabular{ll}{
@@ -18,10 +18,14 @@ Version: \tab 1.0\cr
 Date: \tab 2012-01-06\cr
 License: \tab What license is it under?\cr
 }
-~~ An overview of how to use the package, including the most important functions ~~
+
+
+The main function is SCRf.fn -- see below for an example. 
+
+
 }
 \author{
-Who wrote it
+Andy Royle  and Robin E. Russell 
 
 Maintainer: Who to complain to <yourfault@somewhere.net>
 ~~ The author and/or maintainer of the package ~~
@@ -37,5 +41,14 @@ Maintainer: Who to complain to <yourfault@somewhere.net>
 ~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
-~~ simple examples of the most important functions ~~
+
+data("lions")
+scrobj<-list(traps=traps.lions,captures=captures.lions,statespace=statespace.lions)
+
+test<-
+SCRf.fn(scrobj,ni=220, burn=20,
+ skip=2,nz=200,Msigma=1, Mb=0, Msex=0, Msexsigma=0, Xd=NULL,
+ Xeff=NULL, Xsex=NULL, thinstatespace=2)
+
+
 }
