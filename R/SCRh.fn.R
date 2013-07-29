@@ -12,6 +12,13 @@ statespace<-scrobj$statespace
 alive<-scrobj$alive
 Xd<- scrobj$Xd
 
+## current SCRh and prior versions:  trapid, individual, occasion
+##
+## EDF: session, individual, occasion, trapID
+## Now we assume EDF as input and need to reorganize to the old format so the rest of the code works
+
+captures<- cbind(captures[,4],captures[,2],captures[,3])
+
 
 
 if(   length(unique(captures[,2])) != length(min(captures[,2]):max(captures[,2])) ) {
@@ -154,7 +161,7 @@ alive.trues[i,T,1:ntraps]<-alive[i,t]
 }
 }
 alive.trues<-as.vector(alive.trues)
-aliveid<-alive.trues[msk2==1]  
+aliveid<-alive.trues[msk2==1]
 
 
 ##
@@ -263,7 +270,7 @@ if(is.null(Xd)){
       Xd<-rep(1,nG)
   }
   beta.den<-0
-  
+
 
 
 ###
@@ -594,7 +601,7 @@ likdiff[z==0]<-0   # this lines sets acceptance prob to 1 for z=0 guys
 logprior.new<-    Xd[newcenters]*beta.den
 logprior.old<-    Xd[centers]*beta.den
 
-#likdiff<-likdiff + log(qold/qnew) 
+#likdiff<-likdiff + log(qold/qnew)
 ### I think dimension of these is wrong......
 likdiff<-likdiff + log(qold/qnew)  + (logprior.new-logprior.old)
 

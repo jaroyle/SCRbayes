@@ -28,6 +28,8 @@ and the survey dates in columns 4 to column 3+k where k=the number of
 survey dates. Each row of the matrix will contain either a 1 if the trap
 was operational on the survey date or a 0 if the trap was not operational.
 
+
+XXXX captures -- NO, andy changed this on 7/29 XXXXXXX
 captures: a matrix
 where the number of rows=the number of captures.  Each row contains 3
 columns labeled LOC_ID, ANIMAL_ID, and SO; where LOC_ID =the number of
@@ -325,9 +327,15 @@ if(!harvest)
 Alive.sims<-matrix(1,nrow=length(unique(captures[,2])),ncol=K)
 
 
+session<- rep(1,nrow(captures))
 
-capture.sims<-data.frame(trapid=rep(captures[,1],3), individual=rep(captures[,2],3), 
-SO=c(captures[,4], captures[,5]*2, captures[,6]*3)) 
+capture.sims<-data.frame(
+session=session,
+individual=rep(captures[,2],3), 
+SO=c(captures[,4], captures[,5]*2, captures[,6]*3),
+trapid=rep(captures[,1],3)
+) 
+
 capture.sims<-subset(capture.sims, capture.sims$SO!=0)  ###check captures, eliminate SO=0
 
 scrobj2<-list(traps=traps.sims, captures=capture.sims, statespace=ss.animal.sims, alive=Alive.sims,Xd=f)
