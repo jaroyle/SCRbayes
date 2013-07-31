@@ -177,14 +177,35 @@ Andy Royle and Robin Russell
 \examples{
 
 
-## need to test this and make sure it works or not without alive or Xd specified
 
+
+## Load the mountain lion data
 data("lions")
-scrobj<-list(traps=traps.lions,captures=captures.lions,statespace=statespace.lions)
 
-test<-SCRh.fn(scrobj,ni=220, burn=20,
- skip=2,nz=200,Msigma=1, Mb=0, Msex=0, Msexsigma=0, Xd=NULL,
- Xeff=NULL, Xsex=NULL, thinstatespace=2)
+## Reformat the "captures" data into the standard encounter data file (EDF) format
+newcaptures.lions<-cbind(
+   session = rep(1,nrow(captures.lions)),
+   individual=captures.lions[,2],
+   occasion=captures.lions[,3],
+   trapid=captures.lions[,1])
+
+## No animals were removed (dead) so "alive" is a matrix of 1's
+alive=matrix(1,nrow=length(unique(newcaptures.lions[,"individual"])),ncol=1)
+## State-space covariate: just constant in this case
+Xd<- rep(1,nrow(statespace.lions))
+
+### old format
+### scrobj<-list(traps=traps.lions,captures=captures.lions,statespace=statespace.lions)
+scrobj<-list(
+    traps=traps.lions,
+    captures=newcaptures.lions,
+    statespace=statespace.lions,
+    alive=alive,
+    Xd=Xd)
+
+test<-SCRh.fn(scrobj,ni=220, burn=20, skip=2,nz=200,
+      Msigma=1, Mb=0, Msex=0, Msexsigma=0,
+      Xeff=NULL, Xsex=NULL, thinstatespace=2)
 
 
 ### here is a comprehensive example based on simulated data. This can be

@@ -26,7 +26,6 @@ e2dist(x, y)
 %%   a matrix nrows=the number of rows in grid x and ncols=the number of capture locations.  matrix contains the euclidian distance between the point in the grid and the capture location
 }
 %% ...
-}
 \references{
 %% ~put references to the literature/web site here ~
 }

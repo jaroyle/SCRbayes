@@ -5,5 +5,5 @@ Version: 0.1
 Date: 2012-01-06
 Author: Who wrote it
 Maintainer: Andy Royle <aroyle@usgs.gov>
-Description: More about what it does (maybe more than one line)
+Description: Bayesian analysis of some basic spatial capture-recapture models. This handles fairly large problems in a more efficient manner than BUGS/JAGS. Capabilities are limited right now but the package is currently under active development. Go here for support: https://groups.google.com/forum/?hl=en-US#!forum/spatialcapturerecapture
 License: What license is it under?

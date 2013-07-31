@@ -255,7 +255,7 @@ if(is.na(theta)){
  }
 
 loglam0<-log(.018)
-beta<-0
+beta.behave<-0
 beta.sex<-0
 # start beta1=0 so if there's no covariate this parameter is zeroed out
 beta1<-0
@@ -298,7 +298,7 @@ c2<- (S[indid,2]-trapgridbig[,2])^2
 gof.new<-gof.data<-rep(NA,(ni-burn)/skip)
 
 out<-matrix(NA,nrow=(ni-burn)/skip,ncol=13)
-dimnames(out)<-list(NULL,c("bsigma","sigma","bsigma2","sigma2","lam0","beta","beta1(effort)","beta.sex","psi","psi.sex","Nsuper","theta","beta.density"))
+dimnames(out)<-list(NULL,c("bsigma","sigma","bsigma2","sigma2","lam0","beta.behave","beta1(effort)","beta.sex","psi","psi.sex","Nsuper","theta","beta.density"))
 zout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 Sout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 m<-1
@@ -327,9 +327,9 @@ cat("iter: ",i,fill=TRUE)
 ### Updating parameters here should only involve guys with z = 1 (i.e., members of the population)
 
 ### update loglam0
-lp<-   loglam0 + Mb*beta*prevcap - lp.sigma + beta1*Xeff + Msex*beta.sex*Xsex[indid]
+lp<-   loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff + Msex*beta.sex*Xsex[indid]
 loglam0c<-rnorm(1,loglam0,.1)
-lpc<-  loglam0c + Mb*beta*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+lpc<-  loglam0c + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector<-lik.fn(lp,y1)
 llvector.new<-lik.fn(lpc,y1)
 #LM1[1:length(LM1)]<-llvector.new
@@ -349,7 +349,7 @@ if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
 
 ## update theta
 if(update.theta){
-lp<-   loglam0 + Mb*beta*prevcap - lp.sigma + beta1*Xeff + Msex*beta.sex*Xsex[indid]
+lp<-   loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff + Msex*beta.sex*Xsex[indid]
 thetac<-rnorm(1,theta,.02)  # this is between exponential (.5) and gaussian (1)
 
 if(thetac>=0.5 & thetac<=1){
@@ -358,7 +358,7 @@ lp.sigmac<-Msigma*bsigma*(c1+c2)^thetac
 if(Msexsigma==1)
 lp.sigmac<-bsigma[Xsex[indid]+1]*(c1 + c2)^thetac
 
-lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+lpc<-  loglam0 + Mb*beta.behave*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector<-lik.fn(lp,y1)
 llvector.new<-lik.fn(lpc,y1)
 #LM1[1:length(LM1)]<-llvector.new
@@ -391,7 +391,7 @@ if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
 if(Msexsigma==0){
 bsigmac<-exp(rnorm(1,log(bsigma),delta))
 lp.sigmac<- Msigma*bsigmac*(c1+c2)^theta
-lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+lpc<-  loglam0 + Mb*beta.behave*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lpc,y1)
 ##LM1[1:length(LM1)]<- llvector.new
 LM1[aliveid==1]<- llvector.new
@@ -412,7 +412,7 @@ else{
 if(Msexsigma==1){
 bsigmac<-c(exp(rnorm(1,log(bsigma[1]),2*delta)),bsigma[2])
 lp.sigmac<- bsigmac[Xsex[indid]+1]*(c1+c2)^theta
-lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+lpc<-  loglam0 + Mb*beta.behave*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lpc,y1)
 ###LM1[1:length(LM1)]<- llvector.new
 # July 2013
@@ -431,7 +431,7 @@ else{
 
 bsigmac<-c(bsigma[1],exp(rnorm(1,log(bsigma[2]),2*delta)))
 lp.sigmac<- bsigmac[Xsex[indid]+1]*(c1+c2)^theta
-lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+lpc<-  loglam0 + Mb*beta.behave*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lpc,y1)
 ####LM1[1:length(LM1)]<- llvector.new
 # July 2013
@@ -454,7 +454,7 @@ cat("negative bsigma....",fill=TRUE)
 
 if(Msex==1){
 beta.sexc<- rnorm(1,beta.sex,.1)
-lpc<-  loglam0 + Mb*beta*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sexc*Xsex[indid]
+lpc<-  loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sexc*Xsex[indid]
 llvector.new<- lik.fn(lpc,y1)
 ##LM1[1:length(LM1)]<- llvector.new
 # July 2013
@@ -470,14 +470,14 @@ if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
 ### This code allows a "local behavioral effect" as opposed to a conventional
 ###  "global effect" which would not be trap specific.
 if(Mb==1){
-betac<- rnorm(1,beta,.1)
-lpc<-  loglam0 + Mb*betac*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+beta.behave.c<- rnorm(1,beta.behave,.1)
+lpc<-  loglam0 + Mb*beta.behave.c*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lpc,y1)
 ##LM1[1:length(LM1)]<- llvector.new
 ## July 2013
 LM1[aliveid==1]<- llvector.new
 if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
- beta<- betac
+ beta.behave<- beta.behave.c
  llvector<-llvector.new
  lp<-lpc
  LM2<-LM1   # LM2 is current value
@@ -489,7 +489,7 @@ if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
 if(Xeff.tf){
 ### This block of code below deals with effort.
 beta1c<- rnorm(1,beta1,.1)
-lpc<-  loglam0 + Mb*beta*prevcap - lp.sigma + beta1c*Xeff   + Msex*beta.sex*Xsex[indid]
+lpc<-  loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1c*Xeff   + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lpc,y1)
 ##LM1[1:length(LM1)]<- llvector.new
 ## July 2013
@@ -538,7 +538,7 @@ lp.sigmac<-Msigma*bsigma*(c1+c2)^theta
 if(Msexsigma==1)
 lp.sigmac<-bsigma[tmp.sex[indid]+1]*(c1+c2)^theta
 
-lpc<-  loglam0 + Mb*beta*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*tmp.sex[indid]     ## + sex contribution if sex is in the model!
+lpc<-  loglam0 + Mb*beta.behave*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*tmp.sex[indid]     ## + sex contribution if sex is in the model!
 llvector.new<-lik.fn(lpc,y1)
 lik.othersex<- exp(rowsum(llvector.new,indid))
 
@@ -555,7 +555,7 @@ lp.sigma<-Msigma*bsigma*(c1+c2)^theta
 if(Msexsigma==1)
 lp.sigma<-bsigma[Xsex[indid]+1]*(c1+c2)^theta
 
-lp<-  loglam0 + Mb*beta*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+lp<-  loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector.new<- lik.fn(lp,y1)
 ####LM1[1:length(LM1)]<- llvector.new
 ## July 2013
@@ -586,7 +586,7 @@ if(Msexsigma==0)
 lp.sigmac<-Msigma*bsigma*(c1c+c2c)^theta
 if(Msexsigma==1)
 lp.sigmac<-bsigma[Xsex[indid]+1]*(c1c+c2c)^theta
-lpc<- loglam0+ Mb*beta*prevcap - lp.sigmac + beta1*Xeff + Msex*beta.sex*Xsex[indid]
+lpc<- loglam0+ Mb*beta.behave*prevcap - lp.sigmac + beta1*Xeff + Msex*beta.sex*Xsex[indid]
 
 llvector.new<- lik.fn(lpc,y1)
 ####LM1[1:length(LM1)]<- llvector.new
@@ -638,7 +638,7 @@ lp.sigma<-Msigma*bsigma*(c1+c2)^theta
 if(Msexsigma==1)
 lp.sigma<-bsigma[Xsex[indid]+1]*(c1+c2)^theta
 
-lp<-  loglam0 + Mb*beta*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+lp<-  loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 llvector<- lik.fn(lp,y1)
 LM2<-LM1
 
@@ -673,7 +673,7 @@ bsigmatmp<-bsigma
 # realguys<- z[indid]==1
 # cat(sum(realguys)," real observations for GoF",fill=TRUE)
 
-logmu<- loglam0 + Mb*beta*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+logmu<- loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 mu<- ( 1-exp(-exp(logmu)))*z[indid]  # zeros out the z=0 guys so they contribute nothing
 newy<-rbinom(length(mu),1,mu)
 gof.stats<-cbind(y,newy,mu)
@@ -689,7 +689,7 @@ gof.new[m]<- sum(  (sqrt(gof.stats[,3])-sqrt(gof.stats[,4]))[z==1]^2)
 zout[m,]<-z
 Sout[m,]<- centers
 out[m,]<-c(bsigmatmp[1],sigmatmp[1],bsigmatmp[2],sigmatmp[2],
-lam0,beta,beta1,beta.sex,psi,psi.sex,sum(z),theta,beta.den)
+lam0,beta.behave,beta1,beta.sex,psi,psi.sex,sum(z),theta,beta.den)
 print(out[m,])
 if(m%%dumprate==0){
 #write a file here not implemented yet
