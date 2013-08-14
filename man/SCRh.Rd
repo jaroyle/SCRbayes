@@ -177,8 +177,6 @@ Andy Royle and Robin Russell
 \examples{
 
 
-
-
 ## Load the mountain lion data
 data("lions")
 
