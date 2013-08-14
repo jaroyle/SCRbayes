@@ -102,9 +102,9 @@ Andy Royle %%  ~~who you are~~
 
 library("SCRbayes")
 data(lions)
-traps.lions<-read.csv("traps_lions.csv")
-captures.lions<-read.csv("captures_lions.csv")
-statespace.lions<-read.csv("statespace_lions.csv")
+#traps.lions<-read.csv("traps_lions.csv")
+#captures.lions<-read.csv("captures_lions.csv")
+#statespace.lions<-read.csv("statespace_lions.csv")
 dimnames(captures.lions)<-list(1:nrow(captures.lions),c("trapid","individual","occasion"))
 
 lion.scrdata<- scrData(traps.lions,captures.lions,statespace.lions)
