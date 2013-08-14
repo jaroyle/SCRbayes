@@ -176,11 +176,10 @@ Xeff<-Xeff[msk2==1 & alive.trues==1]
 prevcap<-prevcap[msk2==1 & alive.trues==1]
 
 ## Robin Russell July 2013
-##indid.LM<- idx[msk2 == 1, 1]
+indid.LM<- idx[msk2 == 1, 1]
 ### Robin fixed this 8/13/2013
 indid <- idx[msk2 == 1 & alive.trues==1, 1]
-
-indid<-idx[msk2==1,1]
+###indid<-idx[msk2==1,1]
 repid<-idx[msk2==1 & alive.trues==1,2]
 trapid<-idx[msk2==1 & alive.trues==1,3]
 
@@ -305,7 +304,9 @@ zout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 Sout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 m<-1
 
-LM1<-LM2<-matrix(NA,nrow=M,ncol=length(indid)/M)
+# edits 8/14/2013
+#LM1<-LM2<-matrix(NA,nrow=M,ncol=length(indid)/M)
+LM1<-LM2<-matrix(0,nrow=M,ncol=length(indid.LM)/M)
 ones<-rep(1,ncol(LM1))
 
 if(Msexsigma==0)
