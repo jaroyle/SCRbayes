@@ -1,7 +1,7 @@
 SCRh.fn <-
 function(scrobj,
          ni=1100,burn=100,skip=2,nz=200,theta=NA,
-Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL,
+         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL,
 coord.scale=5000,thinstatespace=1,maxNN=20,dumprate=1000){
 
 call <- match.call()
@@ -178,7 +178,7 @@ prevcap<-prevcap[msk2==1 & alive.trues==1]
 ## Robin Russell July 2013
 ##indid.LM<- idx[msk2 == 1, 1]
 ### Robin fixed this 8/13/2013
-indid <- idx[msk2 == 1 & alive.trues==1, 1] 
+indid <- idx[msk2 == 1 & alive.trues==1, 1]
 
 indid<-idx[msk2==1,1]
 repid<-idx[msk2==1 & alive.trues==1,2]
@@ -339,7 +339,6 @@ llvector.new<-lik.fn(lpc,y1)
 ### July 2013
 LM1[aliveid==1]<-llvector.new
 LM2[aliveid==1]<- llvector
-
 if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
  loglam0<-loglam0c
  lam0<-exp(loglam0)
@@ -352,8 +351,8 @@ if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
 ## update theta
 if(update.theta){
 lp<-   loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff + Msex*beta.sex*Xsex[indid]
-thetac<-rnorm(1,theta,.02)  # this is between exponential (.5) and gaussian (1)
-
+thetac<-rnorm(1,theta,.02)
+# theta must be  between exponential (.5) and gaussian (1)
 if(thetac>=0.5 & thetac<=1){
 if(Msexsigma==0)
 lp.sigmac<-Msigma*bsigma*(c1+c2)^thetac
@@ -521,7 +520,6 @@ if(runif(1)< exp(sum(( (LM1[z==1,]-LM2[z==1,])%*%ones)))){
 # this is an application of Bayes rule to get Pr(z=1| y[i,,]=0)
 
 probz<- exp( rowsum(llvector[indid>nind],indid[indid>nind]) ) # only for nind+1...M
-
 probz<- (probz*psi )/(probz*psi + (1-psi))
 z[(nind+1):M]<-rbinom(M-nind,1,probz)
 psi<-rbeta(1,1+sum(z),1+M-sum(z))
@@ -596,7 +594,7 @@ LM1[aliveid==1]<- llvector.new
 likdiff<- (LM1-LM2)%*%ones
 
 
-likdiff[z==0]<-0   # this lines sets acceptance prob to 1 for z=0 guys
+likdiff[z==0]<-0   # all other things equal, this lines sets acceptance prob to 1 for z=0 guys
 
 
 ### edits 7/23/2013
@@ -615,7 +613,6 @@ c1<- (S[indid,1]-trapgridbig[,1])^2
 c2<- (S[indid,2]-trapgridbig[,2])^2
 LM2[accept,]<-LM1[accept,]
 
-plot(S)
 
 ### This block of code updates a density covariate parameter
 beta.den.c<- rnorm(1,beta.den,.25)

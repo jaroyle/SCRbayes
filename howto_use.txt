@@ -1,0 +1,30 @@
+Here are some tips for adding stuff to the package
+
+1) Create a file in the "scrbook/R" directory, say Ch9.R
+
+2) Put some functions in the file
+
+3) Each function needs a help file. Templates can be created using the
+prompt(someFunction) function in R. See help(prompt). After you make the help file
+template, open it and fill in the details. Then put it in the
+"scrbook/man" directory.
+
+4) Now you can build and install the package. See the howto_build.txt
+file for details about that.
+
+
+
+
+
+
+Adding data instead of functions
+
+1) You can put data in the "scrbook/data" directory. The data can be
+in several formats. The easiest is probably a .csv file. For data with
+multiple objects, you can create a data file using:
+
+save(list(statespace=obj1, raster=obj2, ch=captureHist, X=trapLocations), file="ch9data.rda")
+
+
+2) Note that you need help files for the data too. See the
+promptData(someDataObject) command for creating a template.
