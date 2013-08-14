@@ -1,15 +1,16 @@
-change function call from SCRf.fn to scrbayes()
+Change function call from SCRf.fn to scrbayes()
 
-Class for "scr"
+Class for "scrdata"
 
-Helper function to screen data
+Helper function to screen data (see scrData) 
 
-Class for "scrFitBayes"
+Class for "scrFitBayes" or "scrmcmc"? or....???
 
 Goodness-of-fit stuff
 
 Simulator function
 
+Pixel area (of state-space point) and monitor density. 
 
-
+Dead encounter data (location information) 
 

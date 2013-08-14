@@ -176,7 +176,9 @@ Xeff<-Xeff[msk2==1 & alive.trues==1]
 prevcap<-prevcap[msk2==1 & alive.trues==1]
 
 ## Robin Russell July 2013
-indid.LM<- idx[msk2 == 1, 1]
+##indid.LM<- idx[msk2 == 1, 1]
+### Robin fixed this 8/13/2013
+indid <- idx[msk2 == 1 & alive.trues==1, 1] 
 
 indid<-idx[msk2==1,1]
 repid<-idx[msk2==1 & alive.trues==1,2]
