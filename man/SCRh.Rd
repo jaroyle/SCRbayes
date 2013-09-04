@@ -203,38 +203,139 @@ scrobj<-list(
 
 test<-SCRh.fn(scrobj,ni=220, burn=20, skip=2,nz=200,
       Msigma=1, Mb=0, Msex=0, Msexsigma=0,
-      Xeff=NULL, Xsex=NULL, thinstatespace=2)
+      Xeff=NULL, Xsex=NULL, thinstatespace=4)
 
-
-### here is a comprehensive example based on simulated data. This can be
+####
+###
+### here are 2 comprehensive examples based on simulated data. This can be
 ###    used to test the function and make sure its working. 
+####
+####
+
+#### make a 10 by 10 grid of traps  km apart
 
 min_y=0
 max_y=100
 min_x=0
 max_x=100
 grid.density=10
-N<-200
+
 y<-seq(min_y, max_y, by=grid.density)
 x<-seq(min_x, max_x, by=grid.density)
 
 trap_locs<-expand.grid(x[1:length(x)], y[1:length(y)])
 coord.scale=10
+ntraps<- nrow(trap_locs)
  
-traps.sims<-data.frame(TRAP_ID=seq(1,nrow(trap_locs)),x=trap_locs[,1], y=trap_locs[,2], SO1=rep(1, nrow(trap_locs)), So2=rep(1, nrow(trap_locs)), So2=rep(1, nrow(trap_locs)))
+traps.sims<-data.frame(TRAP_ID=seq(1,nrow(trap_locs)),x=trap_locs[,1], y=trap_locs[,2], 
+    SO1=rep(1, nrow(trap_locs)), So2=rep(1, nrow(trap_locs)), So2=rep(1, nrow(trap_locs)))
 
 buffer=10
 make.ss<-function(traps, buffer, grid.density){
- x<-seq(min(traps.sims$x)-buffer, max(traps.sims$x)+buffer, by=grid.density)
- y<-seq(min(traps.sims$y)-buffer, max(traps.sims$y)+buffer, by=grid.density)
- ss.y<-rep(y, length(x))
- ss.x<-rep(x[1], length(y))
- for (i in 2:length(x)){
-    ss.x<-c(ss.x,rep(x[i],length(y)))
- }
- ss.animal<-data.frame(X_coord=ss.x, Y_coord=ss.y, V3=1)
- list(ss.animal=ss.animal)
+x<-seq(min(traps.sims$x)-buffer, max(traps.sims$x)+buffer, by=grid.density)
+y<-seq(min(traps.sims$y)-buffer, max(traps.sims$y)+buffer, by=grid.density)
+ss.y<-rep(y, length(x))
+ss.x<-rep(x[1], length(y))
+for (i in 2:length(x)) {
+  ss.x<-c(ss.x,rep(x[i],length(y)))
 }
+ss.animal<-data.frame(X_coord=ss.x, Y_coord=ss.y, V3=1)
+list(ss.animal=ss.animal)
+}
+
+##make a state space, buffer= buffer + 1/2 grid
+out<-make.ss(traps.sims, buffer,1)
+ssanimal.sims<-out$ss.animal
+
+###simulate activity centers 
+N<-1000
+z_centers<-data.frame(x=rep(0, N), y=(rep(0,N)))
+Potential_x<-seq(-10,110, by=1)
+Potential_y<-seq(-10,110, by=1)
+
+for(i in 1:N){
+   z_centers[i,1]<-sample(Potential_x, 1)
+   z_centers[i,2]<-sample(Potential_y,1)
+}
+
+plot(ssanimal.sims[,1], ssanimal.sims[,2])
+points(traps.sims$x, traps.sims$y, col="red", bg="red", pch=21)
+points(z_centers[,1],z_centers[,2], col="blue", bg="blue", pch=21)
+ 
+######calculate probability of capture for individual i in trap j
+###basics for sigma= 4,5,6,7,8,
+sigma=10
+d<-e2dist(z_centers,traps.sims[,2:3])
+alpha0 <- -2.5
+alpha1 <- 1/(2*sigma*sigma)
+prob_cap<- plogis(-2.5)*exp( - alpha1*d*d)
+
+y<-matrix(NA,nrow=N,ncol=ntraps)
+
+for(i in 1:nrow(y)){
+  y[i,]<-rbinom(ntraps,3,prob_cap[i,])
+}
+
+captures<-data.frame(trapid=col(y)[y>0],individual=row(y)[y>0],number=y[y>0])
+captures$SO=rep(0, nrow(captures))
+captures$SO1=rep(0, nrow(captures))
+captures$SO2=rep(0, nrow(captures))
+
+SO<-c(1,2,3)
+for(i in 1:nrow(captures)){
+  temp<-sample(SO, captures$number[i])
+   for(j in 1:length(temp)){
+    captures[i,temp[j]+3]<-1
+   }
+ }
+
+#####pick h for harvest
+H<-200
+harvest<-sample(1:N,H)
+###randomly assign when they were harvested
+harvest.time<-sample(c(1,2), replace=TRUE,length(harvest))
+
+########set captures to zero that occured after harvest 
+for(i in 1:nrow(captures)){
+ for(j in 1:length(harvest)){
+    captures[i,5]<-ifelse(captures$individual[i]==harvest[j] & harvest.time[j]==1,0, captures[i,5])
+    captures[i,6]<-ifelse(captures$individual[i]==harvest[j] & harvest.time[j]<3,0, captures[i,6])
+  }
+ }
+
+###########create Alive.sims matrix
+Alive.sims<-data.frame(individual=unique(captures$individual))
+Alive.sims[,2:4]<-1
+for(i in 1:nrow(Alive.sims)){
+  for(j in 1:length(harvest)){
+    Alive.sims[i,3]<-ifelse(Alive.sims$individual[i]==harvest[j] & harvest.time[j]==1,0, Alive.sims[i,3])
+    Alive.sims[i,4]<-ifelse(Alive.sims$individual[i]==harvest[j] & harvest.time[j]<3,0, Alive.sims[i,4])
+  }
+}
+
+capture.sims<-data.frame(trapid=rep(captures[,1],3), individual=rep(captures[,2],3), occasion=c(captures[,4], captures[,5]*2, captures[,6]*3)) 
+capture.sims<-subset(capture.sims, capture.sims$occasion!=0)  ###check captures, eliminate SO=0
+
+
+#######don't forget to put the alive.sims matrix in order!!!
+Alive.sims<- Alive.sims[ order(Alive.sims$individual) ,]
+Xsex<-rbinom(length(unique(capture.sims$individual)),1,0.5)
+
+
+scrobj_harv<-scrData(traps=traps.sims, captures=capture.sims, statespace=ssanimal.sims, alive=Alive.sims, Xd=NULL) 
+sim.test1<-SCRh.fn(ni=200, burn=20,scrobj_harv,nz=1000, theta=1,thinstatespace=2, Msex=0, Xsex=NULL, Xeff=NULL)
+
+
+
+####
+#### old code
+####
+####
+
+N<-200
+ 
+traps.sims<-data.frame(TRAP_ID=seq(1,nrow(trap_locs)),x=trap_locs[,1], y=trap_locs[,2], SO1=rep(1, nrow(trap_locs)), So2=rep(1, nrow(trap_locs)), So2=rep(1, nrow(trap_locs)))
+ntraps<-nrow(traps.sims)
 
 ##make a state space, buffer= buffer + 1/2 grid
 out<-make.ss(traps, buffer,1)
@@ -274,10 +375,10 @@ alpha1 <- 1/(2*sigma*sigma)
 prob_cap<- plogis(-2.5)*exp( - alpha1*d*d)
 
 K<-3
-y<-matrix(NA,nrow=N,ncol=121)
+y<-matrix(NA,nrow=N,ncol=ntraps)
 
 for(i in 1:nrow(y)){
-   y[i,]<-rbinom(121,K,prob_cap[i,])
+   y[i,]<-rbinom(ntraps,K,prob_cap[i,])
 }
 
 captures<-data.frame(trapid=col(y)[y>0],individual=row(y)[y>0],number=y[y>0])
@@ -286,65 +387,16 @@ captures$SO1=rep(0, nrow(captures))
 captures$SO2=rep(0, nrow(captures))
 
 SO<-c(1,2,3)
-for(i in 1:nrow(captures))
-{
-temp<-sample(SO, captures$number[i])
-for(j in 1:length(temp))
-{
-captures[i,temp[j]+3]<-1
-}
+for(i in 1:nrow(captures)){
+  temp<-sample(SO, captures$number[i])
+  for(j in 1:length(temp)){
+     captures[i,temp[j]+3]<-1
+   }
 }
 
-### Note: this stuff is commented out b/c I (andy) haven't gone thorugh it
-#### yet. It is assumed to work. 
 
-harvest<-FALSE
-if(harvest){
-#####pick 30 for harvest
-harvest<-sample(unique(captures$individual), 30)
-###randomly assign when they were harvests
-harvest.time<-rep(1,length(harvest))
-for(i in 1:length(harvest))
-{
-ind.caps<-subset(captures, captures$individual==harvest[i])
-ind.SO<-colSums(ind.caps[,4:6]) 
-ind.SO<-ifelse(ind.SO>0,1,0)
-sample.SO<-c(1, 2, 3)
-
-harvest.time[i]<-sample(sample.SO,1,p=ind.SO)
-}
-
-harvests<-data.frame(individual=harvest, time=harvest.time)
-test<-merge(harvests, captures, by="individual", all.y=FALSE)  ###make sure animals are harvested during an occassion they are captured
-
-########set captures to zero that occured after harvest 
-for(i in 1:nrow(captures))
-{
-for(j in 1:length(harvest))
-{
-captures[i,5]<-ifelse(captures$individual[i]==harvest[j] & harvest.time[j]==1,0, captures[i,5])
-captures[i,6]<-ifelse(captures$individual[i]==harvest[j] & harvest.time[j]<3,0, captures[i,6])
-}
-}
-
-###########create Alive.sims matrix
-Alive.sims<-data.frame(individual=unique(captures$individual))
-Alive.sims[,2:4]<-1
-for(i in 1:nrow(Alive.sims))
-{
-for(j in 1:length(harvest))
-{
-Alive.sims[i,3]<-ifelse(Alive.sims$individual[i]==harvest[j] & harvest.time[j]==1,0, Alive.sims[i,3])
-Alive.sims[i,4]<-ifelse(Alive.sims$individual[i]==harvest[j] & harvest.time[j]<3,0, Alive.sims[i,4])
-}
-}
-
-#######don't forget to put the alive.sims matrix in order!!!
-Alive.sims<- Alive.sims[ order(Alive.sims$individual) ,-1]
-}
-if(!harvest)
+### No harvest in this example
 Alive.sims<-matrix(1,nrow=length(unique(captures[,2])),ncol=K)
-
 
 session<- rep(1,nrow(captures))
 
@@ -357,16 +409,15 @@ trapid=rep(captures[,1],3)
 
 capture.sims<-subset(capture.sims, capture.sims$SO!=0)  ###check captures, eliminate SO=0
 
+### This example does NOT use "scrData"
 scrobj2<-list(traps=traps.sims, captures=capture.sims, statespace=ss.animal.sims, alive=Alive.sims,Xd=f)
 Xsex<-rbinom(length(unique(capture.sims$individual)),1,0.5)
 
 time1<- unix.time(
-test2<-
-SCRh.fn(scrobj2,ni= 1200, burn=200,
- skip=2,nz=240,theta=.5,Msigma=1, Mb=0, Msex=0, Msexsigma=0, coord.scale=1,
- Xeff=NULL, Xsex=NULL, thinstatespace=4)
+  test2<-SCRh.fn(scrobj2,ni= 1200, burn=200,
+     skip=2,nz=240,theta=.5,Msigma=1, Mb=0, Msex=0, Msexsigma=0, coord.scale=1,
+     Xeff=NULL, Xsex=NULL, thinstatespace=4)
 )
-
 
 
 

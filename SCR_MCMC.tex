@@ -343,11 +343,14 @@ enumerated before the MCMC iterations are begun.  The size of this set can be ar
 Smaller neighborhoods require fewer calculations but mix more slowly.
 
 So we draw our candidate from that set. Then the actual full conditionals are evaluated.....
+L(y|s^{*}) 
+and compare to L(y|s)
 
-Note for a small enough state-space grid then we could draw directly from the full conditional distribution but I think
-the calculation is too intensive for a fine state-space grid. 
+Note for a small enough state-space grid then we could draw directly
+from the multinomial full conditional distribution but I think
+the calculation is too expensive for a fine state-space grid. 
 
-Note that the model is based on a uniform prior for $s$.
+
 
 
 3 cases require attention
@@ -364,16 +367,6 @@ the same full-conditional distribution
 
 
 
-
-
-
-
-
-
-
-
-
-
 \subsection{Covariates on Density}
 
 We can allow easily for covariates to influence ${\bf s}$. 
@@ -384,8 +377,14 @@ In the context of data augmentation there is a slight blip. The intercept is not
 Because that information is contained in $\psi$ See Royle et al. (in review)......
 
 
-
-
+When we have a covariate that affects density, we just modify the full
+conditional by inserting the multinomial prior distribution:
+\[
+ \pi({\bf s}) = \frac{ exp( \beta z({\bf s}) ) }
+ \frac{ \sum_{s} exp( \beta z({\bf s}) ) }
+\]
+In this case, we have to update the parameter $\beta$ which we do
+using a Metropolis-Hastings step with a random-walk proposal.
 
 
 
