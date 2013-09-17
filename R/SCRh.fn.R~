@@ -700,7 +700,7 @@ m<-m+1
 
 }
 
-out<- list(out=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout,statespace=statespace,gof.data=gof.data,gof.new=gof.new)
+out<- list(out=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout,statespace=statespace,gof.data=gof.data,gof.new=gof.new,call=call)
 
 class(out) <- c("scrfit","list")
 

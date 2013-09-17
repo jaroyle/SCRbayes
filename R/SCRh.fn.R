@@ -689,7 +689,7 @@ gof.new[m]<- sum(  (sqrt(gof.stats[,3])-sqrt(gof.stats[,4]))[z==1]^2)
 zout[m,]<-z
 Sout[m,]<- centers
 out[m,]<-c(bsigmatmp[1],sigmatmp[1],bsigmatmp[2],sigmatmp[2],
-lam0,beta.behave,beta1,beta.sex,psi,psi.sex,sum(z),theta,beta.den)
+lam0, beta.behave, beta1,beta.sex,psi,psi.sex,sum(z),theta,beta.den)
 print(out[m,])
 if(m%%dumprate==0){
 #write a file here not implemented yet
@@ -700,7 +700,17 @@ m<-m+1
 
 }
 
-out<- list(out=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout,statespace=statespace,gof.data=gof.data,gof.new=gof.new,call=call)
+#### vector of model effects
+parms.2.report<-     c(
+TRUE,TRUE,if(Msexsigma==1),if(Msexsigma==1),
+TRUE, if(Mb==1), if(!is.null(Xeff[1])),  if(Msex==1), TRUE, if(Msex==1), TRUE, if(update.theta), if(sum(Xd)>0)
+    )
+
+#model
+#         ni=1100,burn=100,skip=2,nz=200,theta=NA,
+#         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL,
+
+out<- list(out=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout,statespace=statespace,gof.data=gof.data,gof.new=gof.new,call=call,parms2report=parms.2.report)
 
 class(out) <- c("scrfit","list")
 

@@ -29,6 +29,8 @@ trapid<- captures[,"trapid"]
 captures<-cbind(session=session,individual=individual,occasion=occasion,trapid=trapid)
 
 
+
+
 traplocs<-traps[,2:3]
 MASK<-as.matrix(traps[,4:ncol(traps)])
 nind<-max(individual)
@@ -61,6 +63,20 @@ if( (smydata[1]< 10) | (smydata[2] < 5) ){
  return(NULL)
 }
 }
+
+
+
+
+
+check<-cbind(captures[,"trapid"],captures[,"occasion"])
+check2<- MASK[check]
+if(any(check2 != 1)){
+    cat("Some trap operation data != 1",fill=TRUE)
+    return("goose egg")
+}
+
+
+
 
 ##################
 ##################
