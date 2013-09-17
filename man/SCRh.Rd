@@ -121,6 +121,7 @@ activity centers in the MCMC algorithm }
 \item{dumprate}{ number of
   iterations to run before writing a file of results }
 
+\item{call}{ executed function call }
 }
 
 \details{ User is

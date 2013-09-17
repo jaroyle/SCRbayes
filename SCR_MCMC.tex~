@@ -1,0 +1,417 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+
+\usepackage{amssymb}    % used for symbols in figure legends
+%\usepackage{natbib}    % used in formatting of citations and bibliography
+\usepackage{url}
+\usepackage{framed}
+\usepackage{float}
+\input{psfig}
+%\input{boldGreek}
+
+%\linenumbers
+%\raggedright
+%\setlength{\parindent}{.25in}
+
+
+%\lhead{}
+%
+%\rhead{\thepage}
+%\renewcommand\headrulewidth{0.4pt}
+
+\input{boldGreek}
+
+\floatstyle{plain}
+\floatname{panel}{Panel}
+\newfloat{panel}{h}{txt}
+
+\renewcommand{\baselinestretch}{1.0}
+\setlength{\textwidth}{6.5in}
+%\setlength{\evensidemargin}{0.1875in}
+%\setlength{\oddsidemargin}{0.1875in}
+\setlength{\evensidemargin}{0in}
+\setlength{\oddsidemargin}{0in}
+
+\setlength{\textheight}{8.425in}
+%\setlength{\headheight}{.5in}
+%\setlength{\headsep}{.5in}
+%\setlength{\parindent}{.25in}
+\setlength{\topmargin}{0.375in}
+
+
+
+% display page layout
+%\usepackage{layouts}
+%\newcommand\showpage{%
+%    \setlayoutscale{0.27}\setlabelfont{\tiny}%
+%    \printheadingsfalse\printparametersfalse
+%    \currentpage\pagedesign}
+
+% paragraph formatting
+\usepackage{indentfirst}  % indent first line of paragraph in new sections
+%\usepackage{setspace}
+%\singlespacing
+%
+
+\usepackage{graphicx}
+
+\floatname{panel}{Panel}
+\newfloat{panel}{h}{txt}
+
+
+%\usepackage[nomarkers,tablesfirst,nolists]{endfloat}   % places all tables and figures at end of document
+
+
+
+
+
+\begin{document}
+
+\begin{center}
+\Large \textbf{
+MCMC for a Class of Spatial Capture-Recapture Models
+
+}
+\end{center}
+%
+
+\noindent 
+
+\noindent
+
+
+\section{Overview}
+
+We are considering a capture-recapture model in which the observations
+$y(i,j,k)$ are binary encounters of individual $i$, in trap $j$ and
+for period (e.g., night) $k$.
+The basic model is:
+\[
+ y(i,j,k) \sim Bern(\pi(i,j,k))
+\] 
+with
+\[
+ cloglog(\pi(i,j,k)) = \beta_{0} + \beta_{1}x_{ik} - (1/\sigma)*d_{ij}^{2}
+\]
+
+There could be any number of fixed covariates in this model but here
+we have $x_{ik}$ which I assume to be an indicator of previous capture.
+i.e., a behavioral response. It is probably more reasonable that $x_{ik}$
+in this case also be trap-specific but that is a detail that can be 
+resolved later.
+
+To attack this problem by MCMC we have to deal with 3 basic elements:
+\begin{itemize}
+\item[(1)] We don't know $N$. For that we use data augmentation. This is the
+ easy part of the algorithm which I will summarize later.
+\item[(2)] We have to update the ``structural parameters'' of the model.
+These are the regression coefficients which include $\beta_{0}$,
+$\beta_{1}$ and $\sigma$.  I will consider this part of the algorithm
+first since I think it can be economized considerably with careful thought
+and programming.
+\item[(3)] We have to update the spatial effects ${\bf s}$ which are
+the individual home range centers. These are contained in the $d_{ij}$
+terms above. This is the hardest part and I will deal with this at some future time.
+\end{itemize}
+
+
+\section{Dealing with unknown $N$}
+
+This is dealt with by data augmentation (Royle et al. 2007). The idea
+is to introduce a large number of all-zero encounter histories and
+recognize that the augmented data set (containing the all-zeros) is a
+zero-inflated version of the known-N model.  To implement that in
+WinBUGS we introduce a collection of binary indicator variables
+$z_{i}$ for each of the $i=1,2,\ldots, M$ individuals ($M$ = size of
+augmented data set), and the latent variables $z_{i}$ are updated as
+part of the MCMC algorithm.  Thus, when $z_{i}=1$, then the all-zero
+observation ${\bf y}_{i}$ is an element of the ``real'' population.
+That is, ${\bf y}_{i} = {\bf 0}$ is a sampling zero as opposed to a
+fixed zero.
+
+I will outline how this is done in an update of the document.  The key
+thing to keep in mind is that the rest of the MCMC algorithm proceeds
+{\bf conditional on the present values of $z_{1},z_{2},\ldots,z_{M}$}.
+This really simplifies things.
+
+
+\section{Updating the Structural Parameters}
+
+To attack this problem we are using a standard Metropolis-Hastings
+algorithm where we simply compute the log-likelihood for the
+observations twice, once given the current parameter value and a 2nd
+time given a candidate parameter value. I use the random walk proposal
+distribution exclusively.  Let ${\bf y}$ be {\bf all} the observations
+{\bf for which $z=1$} stacked up on each other in a vector format
+($z=1$ means that these are all of the individuals in the actual
+populations).  Let ${\utheta}$ be the vector of regression
+parameters. Somehow we obtain a candidate value of the parameter, most
+likely by sampling its components from a normal distribution having
+mean ${\utheta}$ (this is a random walk Metropolis sampler).  If we
+use that method then define:
+\[
+r = exp( logL({\bf y}|{\utheta}^{*}) - logL({\bf y}|{\utheta}))
+\]
+and we accept ${\utheta}^{*}$ with probability $r$. We do this in
+practice by flipping a coin with probability $r$....generating a
+uniform random number... and then if that number is $< r$ we accept.
+In practice we might also do each {\it component} of ${\bf \utheta}$
+individually so as to improve mixing of the Markov chains. In the
+current version of the R code, \mbox{\tt SCRe.fn}, I am updating
+$\sigma$ and $\beta_{0}$ {\it together} and then doing $\beta_{1}$ by
+itself ({\bf NOTE:} sorry but my notation here is not entirely
+consistent with the R code).
+
+
+The key issue in implement MCMC for this model is {\it efficient
+  computation of the log-likelihood}.  For a situation with 100 traps
+and 500 individuals (including pseudo-individuals) and 12 trap
+occasions there are 600,000 total observations. This is an enormous
+data set to work with.  We have to subset the 500 individuals to
+include only those for which $z=1$ and then compute the
+log-likelihood.  We can reduce the size considerably by summing over
+the $K=12$ replicates which is allowable if there are no ``time
+effects''. However, we would like to compute $logL$ efficiently for
+the general case and so we focus on that for now.
+
+Ok, so, what does the $logL$ look like? It is just Bernoulli of the
+form:
+\[
+L = \prod_{i,j,k}  \pi(i,j,k)^{y(i,j,k)} (1-\pi(i,j,k))^{1-y(i,j,k)}
+\]
+where
+\[
+ \pi(i,j,k) = 1-exp(- 
+exp( \beta_{0} + \beta_{1}x_{ik} - (1/\sigma)*d_{ij}^{2} ))
+\]
+
+It is worth noting that if $y=0$ then the first part of $L$ is {\it
+  always} 1.0 whereas if $y=1$ then the 2nd part of $L$ is always 1.0.
+Thus we can express the likelihood L as:
+\[
+L = \prod_{y=1}  \pi(i,j,k) \prod_{y=0} (1-\pi(i,j,k))
+\]
+Further, in terms of  the log-likelihood we have
+\[
+logL = \sum_{y=1} log(  \pi(i,j,k) )  \prod_{y=0} 
+- exp( \beta_{0} + \beta_{1}x_{ik} - (1/\sigma)*d_{ij}^{2} )
+\]
+While my notation is not explicit here I want to emphasize that the
+2nd term includes the summed values of $1-\pi(i,j,k)$ only for those
+values of $y$ that are equal to 0.
+
+We should be able to come up with some very efficient ways of
+evaluating $logL$ either explicitly or by using some tricks, such as
+only computing certain required components, or saving bits from
+previous evaluations, etc..  We will have to work on this.
+
+Ok, so consider a MH algorithm for the 3 parameters. If we update each
+of those individually the MH algorithm is structured like this:
+
+\begin{itemize}
+\item (A1) Evaluate $logL({\bf y}|\beta_{0},\beta_{1},\sigma)$
+
+\item (A2)  Draw a candidate value of $\beta_{0}$, say $\beta_{0}^{*}$
+
+\item (A3) Evaluate $logL({\bf y}|\beta_{0}^{*},\beta_{1},\sigma)$
+
+\item (A4) Accept with probability $r$ according to the rule given above.
+\end{itemize}
+
+\begin{itemize}
+\item (B1) Evaluate $logL({\bf y}|\beta_{0},\beta_{1},\sigma)$. Obviously
+ this should not require a complete reevaluation as the calculations
+ have been done in the A step.
+
+\item (B2)  Draw a candidate value of $\beta_{1}$, say $\beta_{1}^{*}$
+
+\item (B3) Evaluate $logL({\bf y}|\beta_{0},\beta_{1}^{*},\sigma)$
+
+\item (B4) Accept with probability $r$ according to the rule given above.
+\end{itemize}
+
+\begin{itemize}
+\item (C1) Evaluate $logL({\bf y}|\beta_{0},\beta_{1},\sigma)$. Obviously
+ this should not require a complete reevaluation as the calculations
+ have been done in the A step.
+
+\item (C2)  Draw a candidate value of $\sigma$, say $\sigma^{*}$
+
+\item (C3) Evaluate $logL({\bf y}|\beta_{0},\beta_{1},\sigma^{*})$
+
+\item (C4) Accept with probability $r$ according to the rule given above.
+\end{itemize}
+
+
+
+\subsection{Alternative distance function}
+
+Its in there.
+
+\subsection{Behavioral Response}
+
+Its in there. 
+
+
+
+
+
+
+
+
+
+\section{The Data Augmentation Part of the Algorithm}
+
+{\it 
+This step of the MCMC algorithm determines which of the data
+augmentation variables, $z$, are equal to 1. It is the $z=1$ subset of
+individuals for which the calculations in the previous Section are
+carried out.
+}
+
+
+Bayesian analysis of this class of models is facilitated by data
+augmentation.  One of the motives for doing this is that Bayesian
+analysis is carried out conditional on the individual activity centers
+${\bf s}_{i}$. In principle, then, we could specify fairly complex
+models describing how the activity centers are distributed in space
+and then, in the MCMC, we only have to be able to simulate the
+resulting point process appropriately.  Conversely, if we tried to do
+integrated likelihood then we would have an $N-$fold integral to carry
+out.
+
+Operationally, using data augmentation, we add a large number of
+all-zero encounter histories to our data set. If $n$ is the number of
+individuals encountered then let $M-n$ be the number we add to the
+data set, chosen so that $M$ is a reasonable upper bound on the actual
+population size $N$. Note, in practice, we probably choose $M$ by
+trial and error. The considerations are this: We want $M$ to be as
+small as possible in order to save calculations but if it is too
+small, then the posterior of $N$ will be truncated. That is bad.  So
+we have to fiddle around with that until we get it about right.
+
+Given the augmented data set, the model contains a set of binary
+indicator variables $z_{i}$ for $i=1,2,\ldots,M$.  These are
+``zero-inflation'' variables such that if $z_{i}=1$ then individual
+$i$ is a member of the population that was exposed to sampling. In
+other words, the observations ${\bf y}_{i}$, correspond to data that
+arose by the binomial sampling process. Conversely, if $z_{i}=0$, then
+the observations ${\bf y}_{i}$ are {\it fixed} zeros. In this way,
+i.e., by zero-inflation, data augmentation accounts for the fact that
+our augmented data set contains too many zeros.
+
+The model for the $z_{i}$ variables is $z_{i} \sim
+\mbox{Bernoulli}(\psi)$.  As part of the MCMC algorithm we have to
+impute the ``missing'' $z_{i}$ values. Note that $z_{i}=1$ for the
+$i=1,2,\ldots,n$ observed individuals, necessarily.  Thus we only need
+to update $z_{i}$ for the augmented pseudo-individuals. This is a
+simple applications of Bayes' rule:
+\[
+ Pr(z=1|{\bf y} = 0) = \frac{Pr({\bf y}=0|z=1)Pr(z=1) }{Pr({\bf y}=0)}
+\]
+Recall
+\[
+ \pi(i,j,k) = 1-exp(- 
+exp( \beta_{0} + \beta_{1}x_{ik} - (1/\sigma)*d_{ij}^{2} ))
+\]
+thus
+\begin{eqnarray}
+Pr({\bf y}_{i} = 0|z_{i}=1) &=&
+ \prod_{j} \prod_{k} exp(- exp( \beta_{0} + \beta_{1}x_{ik} -  (1/\sigma)*d_{ij}^{2} )) \\
+ & = & exp(- \sum_{j} \sum_{k} exp( \beta_{0} + \beta_{1}x_{ik} -  (1/\sigma)*d_{ij}^{2} ))
+\end{eqnarray}
+which, clearly, some economies should be realizable.  In particular,
+we should be able to compute this by recycling calculations from the
+previous step although the current version of the MCMC algorithm does
+not make an effort to do that.  As time permits or we have a post-doc
+or something then we can work on that.  To get the denominator (the
+marginal probability $Pr({\bf y} = 0)$) of this Bayes' rule quantity,
+note that $Pr({\bf y}=0|z=0) = 1$.
+
+Once these calculations are done then we simply flip coins for
+$i=n+1,\ldots,M$ having probabilities $Pr(z=1|{\bf y} = 0)$ and those
+coin flips determine the current values of $z_{n+1},\ldots,z_{M}$.
+
+
+
+
+
+
+\section{Updating $\{ {\bf s}_{i} \}$ -- the Activity Centers}
+
+Right now we consider only the case where $s$ is uniform on ${\cal
+  S}$, the collection of points defining the state-space.  If $z=0$
+then this is easy.  We draw $s$ from the prior.  If $z=1$ then we have
+to look at the data.
+
+The strategy is to use a ``random walk'' proposal distribution for
+each $s$.
+Candidates are drawn by perturbing the current value locally. Specifically, 
+we start off with a collection of neighbors for point s, say ${\cal N}(s)$ which are 
+enumerated before the MCMC iterations are begun.  The size of this set can be arbtirary.
+Smaller neighborhoods require fewer calculations but mix more slowly.
+
+So we draw our candidate from that set. Then the actual full conditionals are evaluated.....
+
+Note for a small enough state-space grid then we could draw directly from the full conditional distribution but I think
+the calculation is too intensive for a fine state-space grid. 
+
+Note that the model is based on a uniform prior for $s$.
+
+
+3 cases require attention
+
+(1) The $n$ observed individuals
+
+(2) The $n_{0}$ individuals for which $z=1$ but $y=0$. They all have
+the same full-conditional distribution
+
+(3) Individuals for which $z=0$ are drawn from the prior distribution.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Covariates on Density}
+
+We can allow easily for covariates to influence ${\bf s}$. 
+In particular, under the discrete state-space formulation, in that case then
+${\bf s}_{i}$ is a multinomial trial.........
+
+In the context of data augmentation there is a slight blip. The intercept is not identifiable.
+Because that information is contained in $\psi$ See Royle et al. (in review)......
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Goodness-of-Fit using a Bayesian p-value}
+
+The current version of the R code (SRCe.fn) has a GoF evaluation built
+into it.
+
+
+
+
+
+
+\end{document}
+

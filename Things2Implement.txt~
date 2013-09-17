@@ -1,0 +1,20 @@
+short term objectives:
+ 1. beef up scrData capabilities
+ 2. move all data object handling from SCRh into scrData
+ 3. move GoF calculation into a helper function REMOVE from SCRh
+
+
+Change function call from SCRf.fn to scrbayes()
+
+
+
+Class for "scrFitBayes" or "scrmcmc"? or....???
+
+Goodness-of-fit stuff
+
+Simulator function
+
+Pixel area (of state-space point) and monitor density. 
+
+Dead encounter data (location information) 
+
