@@ -1,8 +1,8 @@
 Package: SCRbayes
 Type: Package
-Title: What the package does (short line)
-Version: 0.1
-Date: 2012-01-06
+Title: Bayesian analysis of spatial capture-recapture models
+Version: 0.12
+Date: 2013-09-19
 Author: Who wrote it
 Maintainer: Andy Royle <aroyle@usgs.gov>
 Description: Bayesian analysis of some basic spatial capture-recapture models. This handles fairly large problems in a more efficient manner than BUGS/JAGS. Capabilities are limited right now but the package is currently under active development. Go here for support: https://groups.google.com/forum/?hl=en-US#!forum/spatialcapturerecapture

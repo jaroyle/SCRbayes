@@ -92,8 +92,6 @@ Msigma=1, Mb=0, Msex=1, Msexsigma=1,
 coord.scale=5000, Xeff=NULL, Xsex=wsex, thinstatespace=4)
 
 
-
-
 ## maybe str(wolverine) ; plot(wolverine) ...
 }
 \keyword{datasets}

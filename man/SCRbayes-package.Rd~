@@ -32,9 +32,11 @@ Maintainer: Who to complain to <yourfault@somewhere.net>
 }
 \references{
 ~~ Literature or other references for background information ~~
+
+~~ Optionally other standard keywords, one per line, from file KEYWORDS
+in theR
+documentation directory ~~
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R ~~
-~~ documentation directory ~~
 \keyword{ package }
 \seealso{
 ~~ Optional links to other man pages, e.g. ~~
@@ -42,13 +44,21 @@ Maintainer: Who to complain to <yourfault@somewhere.net>
 }
 \examples{
 
-data("lions")
-scrobj<-list(traps=traps.lions,captures=captures.lions,statespace=statespace.lions)
 
-test<-
-SCRf.fn(scrobj,ni=220, burn=20,
- skip=2,nz=200,Msigma=1, Mb=0, Msex=0, Msexsigma=0, Xd=NULL,
+
+library("SCRbayes")
+data(lions)
+
+dimnames(captures.lions)<-
+   list(1:nrow(captures.lions),c("trapid","individual","occasion"))
+
+lion.scrdata <- scrData(traps.lions,captures.lions,statespace.lions)
+
+test <- SCRh.fn(lion.scrdata,ni=220, burn=20,
+ skip=2,nz=200,Msigma=1, Mb=0, Msex=0, Msexsigma=0, 
  Xeff=NULL, Xsex=NULL, thinstatespace=2)
+
+
 
 
 }

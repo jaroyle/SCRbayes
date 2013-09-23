@@ -2,7 +2,7 @@ SCRh.fn <-
 function(scrobj,
          ni=1100,burn=100,skip=2,nz=200,theta=NA,
          Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL,
-coord.scale=5000,thinstatespace=1,maxNN=20,dumprate=1000){
+coord.scale=5000,area.per.pixel=1,thinstatespace=1,maxNN=20,dumprate=1000){
 
 call <- match.call()
 
@@ -61,6 +61,8 @@ if(   length(unique(captures[,2])) != length(min(captures[,2]):max(captures[,2])
 ##################
 ##################
 ##################
+totalarea<- nrow(statespace)*area.per.pixel
+
 thinned<- seq(1,nrow(statespace),thinstatespace)
 statespace<-statespace[thinned,]
 Xd<-Xd[thinned]
@@ -70,6 +72,9 @@ G<-G[goodbad==1,]
 Gunscaled<-G
 Xd<- Xd[goodbad==1]
 nG<-nrow(G)
+
+new.area.per.pixel<- totalarea/nG
+
 
 
 ###
@@ -298,8 +303,8 @@ c2<- (S[indid,2]-trapgridbig[,2])^2
 
 gof.new<-gof.data<-rep(NA,(ni-burn)/skip)
 
-out<-matrix(NA,nrow=(ni-burn)/skip,ncol=13)
-dimnames(out)<-list(NULL,c("bsigma","sigma","bsigma2","sigma2","lam0","beta.behave","beta1(effort)","beta.sex","psi","psi.sex","Nsuper","theta","beta.density"))
+out<-matrix(NA,nrow=(ni-burn)/skip,ncol=14)
+dimnames(out)<-list(NULL,c("bsigma","sigma","bsigma2","sigma2","lam0","beta.behave","beta1(effort)","beta.sex","psi","psi.sex","Nsuper","theta","beta.density","D"))
 zout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 Sout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 m<-1
@@ -686,10 +691,12 @@ gof.new[m]<- sum(  (sqrt(gof.stats[,3])-sqrt(gof.stats[,4]))[z==1]^2)
 #####
 #####
 
+density<- sum(z)/totalarea
+
 zout[m,]<-z
 Sout[m,]<- centers
 out[m,]<-c(bsigmatmp[1],sigmatmp[1],bsigmatmp[2],sigmatmp[2],
-lam0, beta.behave, beta1,beta.sex,psi,psi.sex,sum(z),theta,beta.den)
+lam0, beta.behave, beta1,beta.sex,psi,psi.sex,sum(z),theta,beta.den,density)
 print(out[m,])
 if(m%%dumprate==0){
 #write a file here not implemented yet
@@ -701,10 +708,14 @@ m<-m+1
 }
 
 #### vector of model effects
-parms.2.report<-     c(
-TRUE,TRUE,if(Msexsigma==1),if(Msexsigma==1),
-TRUE, if(Mb==1), if(!is.null(Xeff[1])),  if(Msex==1), TRUE, if(Msex==1), TRUE, if(update.theta), if(sum(Xd)>0)
-    )
+parms.2.report<-
+    c(TRUE,TRUE,Msexsigma==1,Msexsigma==1,
+TRUE, Mb==1,
+Xeff.tf,
+ Msex==1, TRUE, Msex==1, TRUE, update.theta,
+sum(Xd)>0,
+TRUE )
+
 
 #model
 #         ni=1100,burn=100,skip=2,nz=200,theta=NA,

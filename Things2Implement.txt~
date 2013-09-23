@@ -2,9 +2,10 @@ short term objectives:
  1. beef up scrData capabilities
  2. move all data object handling from SCRh into scrData
  3. move GoF calculation into a helper function REMOVE from SCRh
+ 4. print method for objects of class scrdata and scrfit
 
 
-Change function call from SCRf.fn to scrbayes()
+Change function call from SCRf.fn to scrbayes() 
 
 
 

@@ -1,8 +1,82 @@
+workflow document:
+
+?SCRbayes should give a quick "how to get started". I have some SCR
+data and need an answer fast! HELP!!!!
+
+SCRbayes exists to do Bayesian analysis of a certain class of SCR
+models. (to be described shortly). But first, why should you use
+SCRbayes over WinBUGS or JAGS or the R package secr (which does
+likelihood analysis)? The main reason is that SCRbayes is relatively
+more robust (in an operational sense) to very large problems. If you
+have a lot of traps, sample occassions, or a large state-space grid,
+SCRbayes is less likely to run out of memory or take forever to
+produce estimates.  
+Note: SCRbayes works strictly with a DISCRETE state-space grid. IF you
+can define your state-space by a rectangle or a constrained rectangle
+then JAGS or WinBUGS can be extremely fast. 
+Note: secr can be very efficient too if you do not define the
+state-space grid ("habitat mask" in secr terminology) or if you define
+it to be relatively coarse. Its only when the state-space grid becomes
+enormous that secr starts to break down [note: this is subject to
+change]. 
+Note: also when there are many, many traps (e.g., > 1000) both secr
+and JAGS/WinBUGS start having problems. 
+
+I have run models effectively in SCRbayes with 8000 traps, 8000
+state-space grid points, and 144 sample occasions. These take 10-12
+hours to run on a really fast computer but it works.
+
+Note: multiple core capabilities will be developed. 
+Note: use the "dumprate" argument (not yet implemented) to get
+intermediate output. 
+Note: how long should the MCMC algorithm run?
+
+
+1. 
+you need: trap locations in some coordinate system preferably UTM or other
+Cartesian system. 
+
+?traps
+?TDF
+need as.TDF
+class "TDF"
+
+2. 
+you need: a state-space grid which defines the possible locations of
+individuals. The grid should be a regular spaced grid of points. This
+will be a nG x 2 matrix.  
+You need to add a 3rd column which defines whether each point is
+available habitat (1) or not (0). We recommend defining everything to
+be habitat even if you think it isn't.
+
+You should convert your statespace grid to an object of class
+"statespace" using the as.statespace() function. 
+
+If you don't have a state-space grid you can easily make one using the
+make.statespace function. 
+
+see ?statespace or ?make.statespace 
+
+3. 
+you need some encounter data from an actual study that you did.....
+as.EDF
+
+
 short term objectives:
- 1. beef up scrData capabilities
+ 1. beef up scrData capabilities and print.scrdata
+
  2. move all data object handling from SCRh into scrData
+
  3. move GoF calculation into a helper function REMOVE from SCRh
- 4. print method for objects of class scrdata and scrfit
+
+ 4. BEEF up print method for objects of class scrdata and scrfit
+
+
+need print.statespace or print.ss
+need to class statespace files. 
+need as.statespace to coerce any nG x 2 matrix into a statespace file
+need example in make.statespace helpfile
+make.statespace needs to accept home range size as input 
 
 
 Change function call from SCRf.fn to scrbayes() 
@@ -15,7 +89,10 @@ Goodness-of-fit stuff
 
 Simulator function
 
-Pixel area (of state-space point) and monitor density. 
+
 
 Dead encounter data (location information) 
 
+
+
+DONE      Pixel area (of state-space point) and monitor density. 

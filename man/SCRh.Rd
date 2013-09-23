@@ -19,8 +19,7 @@ Xeff = NULL, Xsex = NULL, coord.scale = 5000, thinstatespace = 1, maxNN = 20, du
 A list of type "scrobj" which has 5 elements "traps",
   "captures", "statespace", "alive", "Xd"
 
-traps:
-traps is a matrix containing a seq of numbers (1,2,3....j) where j= the
+traps: traps is a matrix containing a seq of numbers (1,2,3....j) where j= the
 number of traps in column 1.  Traps can be cameras, hair snares, or
 centerpoints of grid locations.  In columns two and three of the trap
 matrix are the X and Y or longitude and latitude of the trap locations,
@@ -43,7 +42,7 @@ matrix where the X or longitudinal coordinate is in the first column and
 the Y or latitudinal coordinate is in the second column, and HABITAT= to
 1 or 0 is the third column.  The third column indicates whether the
 point defined by the X,Y locations is considered habitat (normally)
-habitat=1; (see function make.ss) 
+habitat=1; (see function make.statespace) 
 
 alive: a matrix of (nind x K) where alive[i,k] = 1 if the individual is
 thought to be alive and alive[i,k]=0 if it is known dead.
@@ -109,6 +108,23 @@ animal [n] in the capture file, must be provided if Msex or Msexsigma=1
 \item{coord.scale}{ coord.scale scales the coordinate system by the
 input value.  The default is 5000 and will scale all X and Y locations
 by 5000 }
+
+\item{area.per.pixel=1}{ Area of a state-space grid point. Default is 1
+  unit of area. This is used in the conversion of population size N to
+  density D. Using this value, the total area of the state-space is
+  computed and D = N/totalarea is a derived parameter. Posterior
+  summaries of D will be reported by print() and other summary
+  functions. 
+  If thinstatespace is specified then the area.per.pixel
+  is adjusted.
+
+  If coordinates are UTM or any other scale but you wish to have density
+  reported in some other units, then provide  area.per.pixel in the
+  relevant units. e.g., if a grid cell is 1000 x 1000 meters and you
+  wish density to be in units of "per km^2" then specify area.per.pixel
+  = 1. If you want density in units "per 100 km^2" then specify
+  area.per.pixel = 0.01. 
+}
 
 \item{thinstatespace}{ thinstate allows the user to retain
 every yth point in the state space, fewer points can add with

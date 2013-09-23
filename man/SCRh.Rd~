@@ -110,6 +110,23 @@ animal [n] in the capture file, must be provided if Msex or Msexsigma=1
 input value.  The default is 5000 and will scale all X and Y locations
 by 5000 }
 
+\item{area.per.pixel=1}{ Area of a state-space grid point. Default is 1
+  unit of area. This is used in the conversion of population size N to
+  density D. Using this value, the total area of the state-space is
+  computed and D = N/totalarea is a derived parameter. Posterior
+  summaries of D will be reported by print() and other summary
+  functions. 
+  If thinstatespace is specified then the area.per.pixel
+  is adjusted.
+
+  If coordinates are UTM or any other scale but you wish to have density
+  reported in some other units, then provide  area.per.pixel in the
+  relevant units. e.g., if a grid cell is 1000 x 1000 meters and you
+  wish density to be in units of "per km^2" then specify area.per.pixel
+  = 1. If you want density in units "per 100 km^2" then specify
+  area.per.pixel = 0.01. 
+}
+
 \item{thinstatespace}{ thinstate allows the user to retain
 every yth point in the state space, fewer points can add with
 computational time, but two few point will bias density estimates }
@@ -121,6 +138,7 @@ activity centers in the MCMC algorithm }
 \item{dumprate}{ number of
   iterations to run before writing a file of results }
 
+\item{call}{ executed function call }
 }
 
 \details{ User is
