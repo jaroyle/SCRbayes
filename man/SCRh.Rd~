@@ -19,8 +19,7 @@ Xeff = NULL, Xsex = NULL, coord.scale = 5000, thinstatespace = 1, maxNN = 20, du
 A list of type "scrobj" which has 5 elements "traps",
   "captures", "statespace", "alive", "Xd"
 
-traps:
-traps is a matrix containing a seq of numbers (1,2,3....j) where j= the
+traps: traps is a matrix containing a seq of numbers (1,2,3....j) where j= the
 number of traps in column 1.  Traps can be cameras, hair snares, or
 centerpoints of grid locations.  In columns two and three of the trap
 matrix are the X and Y or longitude and latitude of the trap locations,
@@ -43,7 +42,7 @@ matrix where the X or longitudinal coordinate is in the first column and
 the Y or latitudinal coordinate is in the second column, and HABITAT= to
 1 or 0 is the third column.  The third column indicates whether the
 point defined by the X,Y locations is considered habitat (normally)
-habitat=1; (see function make.ss) 
+habitat=1; (see function make.statespace) 
 
 alive: a matrix of (nind x K) where alive[i,k] = 1 if the individual is
 thought to be alive and alive[i,k]=0 if it is known dead.

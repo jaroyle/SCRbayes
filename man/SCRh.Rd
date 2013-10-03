@@ -146,7 +146,49 @@ values to determine the appropriate nz, and the size and density of the
 statespace.  SCRh.fn will provide a summary at the beginning telling the
 user how many animals were captured and how many were recaptured.
 User's should be aware of limitations of their data and determine for
-themselves whether SCR methods are appropriate for their study.  }
+themselves whether SCR methods are appropriate for their study.
+
+
+
+Model implemented by SCRh.fn:
+
+The basic encounter model that exists in SCRh.fn is:
+
+ Pr(y=1) = 1-exp(-lam0*k(x,s))
+
+where
+
+ k(x,s) = exp(-(1/(2*sigma^2))*dist(x,s)^(2/theta))
+ 
+Therefore, for theta = 1/2 this is an exponeital kernal and for theta = 1 this is a Gaussian kernel.  
+Note that the encounter model is usually called the hazard model or complementary log-log model because:
+
+cloglog(Pr(y=1)) = log(lam0) + log(k(x,s))
+ 
+which is why you see things in the code like this:
+
+lp.sigmac<- Msigma*bsigmac*(c1+c2)^theta
+lpc<-  loglam0 + Mb*beta.behave*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
+
+(lp being short for "linear predictor").
+
+We see that 
+
+lpc  = bunchofjunk  - func.of.sigma*(distance.squared)^theta
+  
+
+so that:
+
+exp(lpc) = constant*exp(-func.of.sigma*(distance^2/theta))
+
+ 
+
+ 
+
+ 
+
+
+}
 
 
 \value{ returns an object with several features.  the function names can
