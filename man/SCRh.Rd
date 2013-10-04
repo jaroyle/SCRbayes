@@ -5,8 +5,11 @@
 conducts spatial capture recapture analysis 
 }
 \description{
-Estimates density of animals from mark-recapture surveys where individual animals were unique identfied
- and spatial locations of captured animals were recorded.Estimation is conducted in a Bayesian framework.  
+  Fits SCR models to estimate density
+ of animals from mark-recapture surveys where individual animals were uniquely identfied
+ and spatial locations of captured animals were recorded. Estimation is
+ conducted in a Bayesian framework
+ using data augmentation.  
 }
 \usage{
 SCRh.fn(scrobj,ni = 1100, burn = 100, skip = 2, nz = 200,theta=2, Msigma= 1, Mb = 0, Msex = 0, Msexsigma = 0,
@@ -17,9 +20,12 @@ Xeff = NULL, Xsex = NULL, coord.scale = 5000, thinstatespace = 1, maxNN = 20, du
 \item{scrobj}{
 
 A list of type "scrobj" which has 5 elements "traps",
-  "captures", "statespace", "alive", "Xd"
+  "captures", "statespace", "alive", and "Xd". You can use the function
+  scrData to produce the object or you can create a list with the
+  following elements:
 
-traps: traps is a matrix containing a seq of numbers (1,2,3....j) where j= the
+  
+    traps: traps is a matrix containing a seq of numbers (1,2,3....j) where j= the
 number of traps in column 1.  Traps can be cameras, hair snares, or
 centerpoints of grid locations.  In columns two and three of the trap
 matrix are the X and Y or longitude and latitude of the trap locations,
@@ -27,16 +33,21 @@ and the survey dates in columns 4 to column 3+k where k=the number of
 survey dates. Each row of the matrix will contain either a 1 if the trap
 was operational on the survey date or a 0 if the trap was not operational.
 
+ captures: a matrix
+where the number of rows=the number of captures.  Each row contains 4
+columns labeled "session", "individual", "occasion" and "trapid". The
+order is not important. "individual" = the animal's unique integer
+identity (1,2, ...., n);
+"trapid" = 
+the integer identity of 
+the trap where the animal was captured;
+"occasion" = the sampling occasion on which the capture took place
+(integer). 
+The data format is consistent with the 
+  secr package by Murray Efford. 
 
-XXXX captures -- NO, andy changed this on 7/29 XXXXXXX
-captures: a matrix
-where the number of rows=the number of captures.  Each row contains 3
-columns labeled LOC_ID, ANIMAL_ID, and SO; where LOC_ID =the number of
-the trap where the animal was captured, ANIMAL_ID = the animal's unique
-number (must be a sequence 1,2,,,,number of animals), and SO=the
-sampling occasion on which the capture took place 
 
-statespace: contains the coordinate of potential centers of activity
+ statespace: contains the coordinate of potential centers of activity
 including those from outside the trapping area, the statespace is a
 matrix where the X or longitudinal coordinate is in the first column and
 the Y or latitudinal coordinate is in the second column, and HABITAT= to
@@ -52,14 +63,13 @@ nrows(statespace).
 
 }
 
-\item{ni}{ ni=number of iterations }
+\item{ni}{ ni=number of MCMC iterations }
 
 \item{burn}{ burn=the number of iterations that are considered "burn-in"
   and will be discarded from the final estimation }
 
 \item{skip}{
-  skip=the
-number of iterations in a series that will be retained.  Skip=3 will
+  skip=the thinning rate. Skip=3 will
 retain every third iteration of the MCMC chain.
 }
 \item{nz}{ 
@@ -82,10 +92,10 @@ spatial model, normally Msigma=1
 }
   \item{Mb}{
 Mb is an indicator variable that=1 if behavioral effects on capture histories are expected.  For example trap-happiness or trap shyness.  Setting Mb=1 is analagous to running
-model Mb described by Otis et al. 1978
+model Mb described by Otis et al. (1978).
 }
   \item{Msex}{
-Msex is an indicator variable that=1 if detection probability is to be estimated seperately by sex, if Msex=1, you must provide a vector Xsex (see Xsex for more details)
+Msex is an indicator variable that = 1 if detection probability is to be estimated seperately by sex, if Msex=1, you must provide a vector Xsex (see Xsex for more details)
 }
   \item{Msexsigma}{
 Msex sigma is an indicatore variable that = 1 if sigma is to be estimated seperately by sex, if Msexsigma =1 you must provide a vector Xsex
@@ -100,9 +110,9 @@ Xeff will not be extracted for the likelihood calculations. (the file
 "traps" contains information about which traps x occasions were sampled,
 see above).  }
 
-\item{Xsex}{ Xsex= a vector of length n where n= the
-number of animals;Xsex[n] is either a zero or 1 indicating the sex of
-animal [n] in the capture file, must be provided if Msex or Msexsigma=1
+\item{Xsex}{ Xsex = a vector of length n where n= the
+number of animals; Xsex[i] is either a zero or 1 indicating the sex of
+animal [i] in the capture file, must be provided if Msex or Msexsigma=1
 } 
 
 \item{coord.scale}{ coord.scale scales the coordinate system by the
@@ -126,8 +136,8 @@ by 5000 }
   area.per.pixel = 0.01. 
 }
 
-\item{thinstatespace}{ thinstate allows the user to retain
-every yth point in the state space, fewer points can add with
+\item{thinstatespace}{ allows the user to retain
+every m^{th}  point in the state space, fewer points can add with
 computational time, but two few point will bias density estimates }
 
 \item{maxNN}{ used to determine the "neighborhood" for each grid cell;
@@ -135,75 +145,69 @@ getNN() function in SCRh.fn; information is used in updating the
 activity centers in the MCMC algorithm }
 
 \item{dumprate}{ number of
-  iterations to run before writing a file of results }
+  iterations to run before writing a file of results. Not yet implemented. }
 
 \item{call}{ executed function call }
 }
 
 \details{ User is
-advised to read referenced literature, and experimentation with multiple
+advised to read referenced literature, and experimentat with multiple
 values to determine the appropriate nz, and the size and density of the
 statespace.  SCRh.fn will provide a summary at the beginning telling the
 user how many animals were captured and how many were recaptured.
 User's should be aware of limitations of their data and determine for
 themselves whether SCR methods are appropriate for their study.
 
-
-
-Model implemented by SCRh.fn:
-
-The basic encounter model that exists in SCRh.fn is:
-
+The model implemented by SCRh.fn is the Bernoulli encounter model with a
+hazard model for encounter probability, having the form:
  Pr(y=1) = 1-exp(-lam0*k(x,s))
-
 where
-
  k(x,s) = exp(-(1/(2*sigma^2))*dist(x,s)^(2/theta))
- 
-Therefore, for theta = 1/2 this is an exponeital kernal and for theta = 1 this is a Gaussian kernel.  
-Note that the encounter model is usually called the hazard model or complementary log-log model because:
+
+There are 3 parameters estimated: lam0, sigma, and theta. 
+For theta = 1/2, k(x,s) is an exponeital kernal and for theta = 1 it is a Gaussian kernel.  
+Note that, for the hazard model, effects are linear on the cloglog scale: 
 
 cloglog(Pr(y=1)) = log(lam0) + log(k(x,s))
  
-which is why you see things in the code like this:
+which is why you see lines in the code like the following which
+constructs the linear predictor for a candidate value of the parameter
+"bsigma"
+(names of variables
+here shoul not necessarily have 
+any meaning to you):
 
 lp.sigmac<- Msigma*bsigmac*(c1+c2)^theta
 lpc<-  loglam0 + Mb*beta.behave*prevcap - lp.sigmac + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 
-(lp being short for "linear predictor").
-
 We see that 
-
 lpc  = bunchofjunk  - func.of.sigma*(distance.squared)^theta
-  
-
-so that:
-
+ so that:
 exp(lpc) = constant*exp(-func.of.sigma*(distance^2/theta))
-
- 
-
- 
-
- 
 
 
 }
 
 
-\value{ returns an object with several features.  the function names can
-be used to identify the features associated with the returned object.
-features that can be accessed using $ include, out- a matrix containing
+\value{ Returns a
+ list of class "scrfit".
+Elements 
+can be accessed using the standard method for lists, e.g.,
+scroutput$mcmchist, and summary methods can be used.
+The elements include:
+
+mcmchist -   a matrix containing
 the values of the parameter estimates for all retained iterations.
 
 G - a matrix containing the scaled coordinates of the statespace,
 
 traplocs - a matrix containing the scaled coordinates of the traps, 
 
+Sout - an niter by M matrix containing the number corresponding to the
+row in the statespace that contains the coordinates of the estimated
+activity center for each individual for MCMC iteration i
 
-Sout - an i by n matrix containing the number corresponding to the row in the statespace that contains the coordinates of the estimated activity center for animal n in iteration i
-
-zout - an i by n matrix indicating where the animal was estimated to be a member of the population zout=1 or not zout=0 for each i iteration of the model; zout combined with Sout can be
+zout - an niter by M matrix indicating where the animal was estimated to be a member of the population zout=1 or not zout=0 for each i iteration of the model; zout combined with Sout can be
 used to determine the locations of the animals that were included in the population.see functions spatial.plot and image.scale
 
 }
@@ -386,97 +390,6 @@ sim.test1<-SCRh.fn(ni=200, burn=20,scrobj_harv,nz=1000, theta=1,thinstatespace=2
 
 
 
-####
-#### old code
-####
-####
-
-N<-200
- 
-traps.sims<-data.frame(TRAP_ID=seq(1,nrow(trap_locs)),x=trap_locs[,1], y=trap_locs[,2], SO1=rep(1, nrow(trap_locs)), So2=rep(1, nrow(trap_locs)), So2=rep(1, nrow(trap_locs)))
-ntraps<-nrow(traps.sims)
-
-##make a state space, buffer= buffer + 1/2 grid
-out<-make.ss(traps, buffer,1)
-
-ss.animal.sims<-out$ss.animal
-
-###simulate activity centers 
-z_centers<-data.frame(x=rep(0, N), y=(rep(0,N)))
-Potential_x<-seq(-10,110, by=1)
-Potential_y<-seq(-10,110, by=1)
-
-### a fake covariate here
-f<- .2*(ss.animal.sims[,1] -50)/20  + .2*(ss.animal.sims[,2] - 50)/20 + -.25*((ss.animal.sims[,1] - 50)/20)*((ss.animal.sims[,2] - 50)/20)
-spatial.plot(ss.animal.sims[,1:2],f,add=FALSE)
-
-beta.den<-1
-probs<-exp(beta.den*f)/sum(exp(beta.den*f))
-
-Zmat<- ss.animal.sims[sample( 1:nrow(ss.animal.sims), N, replace=TRUE, prob=probs),1:2]
-
-z_centers[,1] <- Zmat[,1]
-z_centers[,2] <- Zmat[,2]
-
-plot(ss.animal.sims[,1], ss.animal.sims[,2])
-points(traps$x, traps$y, col="red", bg="red", pch=21)
-points(z_centers[,1],z_centers[,2], col="blue", bg="blue", pch=21)
-
- 
-######calculate probability of capture for individual i in trap j
-
-sigma=10
-
-d<-e2dist(z_centers,traps.sims[,2:3])
-
-alpha0 <- -2.5
-alpha1 <- 1/(2*sigma*sigma)
-prob_cap<- plogis(-2.5)*exp( - alpha1*d*d)
-
-K<-3
-y<-matrix(NA,nrow=N,ncol=ntraps)
-
-for(i in 1:nrow(y)){
-   y[i,]<-rbinom(ntraps,K,prob_cap[i,])
-}
-
-captures<-data.frame(trapid=col(y)[y>0],individual=row(y)[y>0],number=y[y>0])
-captures$SO=rep(0, nrow(captures))
-captures$SO1=rep(0, nrow(captures))
-captures$SO2=rep(0, nrow(captures))
-
-SO<-c(1,2,3)
-for(i in 1:nrow(captures)){
-  temp<-sample(SO, captures$number[i])
-  for(j in 1:length(temp)){
-     captures[i,temp[j]+3]<-1
-   }
-}
-
-
-### No harvest in this example
-Alive.sims<-matrix(1,nrow=length(unique(captures[,2])),ncol=K)
-
-session<- rep(1,nrow(captures))
-
-capture.sims<-data.frame(
-session=session,
-individual=rep(captures[,2],3), 
-SO=c(captures[,4], captures[,5]*2, captures[,6]*3),
-trapid=rep(captures[,1],3)
-) 
-
-capture.sims<-subset(capture.sims, capture.sims$SO!=0)  ###check captures, eliminate SO=0
-
-### This example does NOT use "scrData"
-scrobj2<-list(traps=traps.sims, captures=capture.sims, statespace=ss.animal.sims, alive=Alive.sims,Xd=f)
-Xsex<-rbinom(length(unique(capture.sims$individual)),1,0.5)
-
-time1<- unix.time(
-  test2<-SCRh.fn(scrobj2,ni= 1200, burn=200,
-     skip=2,nz=240,theta=.5,Msigma=1, Mb=0, Msex=0, Msexsigma=0, coord.scale=1,
-     Xeff=NULL, Xsex=NULL, thinstatespace=4)
-)
 
 
 
