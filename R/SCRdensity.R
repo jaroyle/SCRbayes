@@ -1,6 +1,9 @@
 SCRdensity <-
 function(obj,nx=30,ny=30,Xl=NULL,Xu=NULL,Yl=NULL,Yu=NULL,
-scalein=1,scaleout=10000,ncolors=10){
+scalein=1,scaleout=1000000*100,ncolors=10){
+## 1000000 scaleout puts density in units per km^2
+## multiplied by 100 is units per 100 km^2
+## assumes units input are meters.
 
 if(any(class(obj)=="scrfit")){
 S<-obj$Sout
