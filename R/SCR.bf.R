@@ -2,7 +2,10 @@
 # SCR.bf calculates bayes factors for a model set based upon 
 # Gelfand and Dey (1994) approximation using the posterior samples.
 # Inputs: requires the output from a set of SCRx.fn models passed 
-# passed to the function in a named list
+# to the function in a named list.
+# I assume that posterior probability density of each parameter 
+# is independent... this may require some adjustment, but I have not found 
+# an easy way of computing multivariate empirical PDFs. 
 
 SCR.bf = function(modelsin, refmodel=NULL){
 	require(mvtnorm)

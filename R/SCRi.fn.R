@@ -1,7 +1,7 @@
-SCRh.bf <-
+SCRh.fn <-
 function(scrobj,
          ni=1100,burn=100,skip=2,nz=200,theta=NA,
-         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL, ss.prob = NULL
+         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL, ss.prob=NULL
 coord.scale=5000,area.per.pixel=1,thinstatespace=1,maxNN=20,dumprate=1000){
 
 call <- match.call()
@@ -17,7 +17,7 @@ Xd<- scrobj$Xd
 ## EDF: session, individual, occasion, trapID
 ## Now we assume EDF as input and need to reorganize to the old format so the rest of the code works
 
-captures<- cbind(captures[,1],captures[,2],captures[,3])
+captures<- cbind(captures[,4],captures[,2],captures[,3])
 
 
 
@@ -33,7 +33,7 @@ if(   length(unique(captures[,2])) != length(min(captures[,2]):max(captures[,2])
 # Msigma = 0 fits non-spatial model
 # statespace (formerly GRID) is the discrete grid of the study area
 # nz = number of "all zero" encounter histories to add
- ##traps=datafile containing the XY locations of the grid center points
+##traps=datafile containing the XY locations of the grid center points
 ###captures=data file containing the ID of the animal, the Sampling occassion the animals was captured on, and the number of the trap the animal was captured in.
 ###statespace=data file containing a fine grid of points
 
@@ -81,6 +81,7 @@ new.area.per.pixel<- totalarea/nG
 		ss.prob = ss.prob[goodbad==1]
 	}
 ##########################################################
+
 
 ###
 ###
@@ -249,8 +250,8 @@ av.coord<-colSums(xxx)/nrow(xxx)
 dvec<-as.vector(e2dist(matrix(av.coord,ncol=2),G))  # finds closest grid pt
 centers1[i]<-(1:length(dvec))[dvec==min(dvec)][1]   # that is initial loc
 }
-# assigns uncaptured animals a center point
-centers2<-sample(1:nG,M-nind,replace=TRUE)
+# assigns uncaptured animals a center point; modified by JFG 10/9/13 with ss.prob
+centers2<-sample(1:nG,M-nind,replace=TRUE, prob=ss.prob)
 centers<-c(centers1,centers2)
 S<-G[centers,]   # initial locations for all M individuals
 
@@ -275,7 +276,7 @@ psi<-.5  # not a good starting values
 psi.sex <- mean(Xsex,na.rm=TRUE)
 z<-c(rep(1,nind),rbinom(nz,1,psi))
 if(sum(sex.naflag)>0)
-Xsex[sex.naflag]<-rbinom(sum(sex.naflag),1,psi.sex)
+Xsex[sex.naflag]<-rbinom(sum(sex.naflag),1,.65)
 
 if(is.null(Xd)){
       Xd<-rep(1,nG)
@@ -312,7 +313,7 @@ out<-matrix(NA,nrow=(ni-burn)/skip,ncol=14)
 dimnames(out)<-list(NULL,c("bsigma","sigma","bsigma2","sigma2","lam0","beta.behave","beta1(effort)","beta.sex","psi","psi.sex","Nsuper","theta","beta.density","D"))
 zout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 Sout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
-LLout <- rep(NA, (ni-burn)/skip)
+LLout<-rep(NA, (ni-burn)/skip)
 m<-1
 
 # edits 8/14/2013
@@ -584,7 +585,18 @@ LM2<-LM1
 ########################
 
 
-newcenters<-trunc(runif(M,0,numnn[centers]))+1  # this might be a dumb way to generate random integers.
+##################################################################
+### Gets new centers with probability weightings - 10/9/13 JFG
+	if (!is.null(ss.prob)){
+		newcenters = rep(NA, M)
+		for (gc in 1:M){
+			newcenters[gc] <- sample(1:numnn[centers[gc]],size=1,replace=TRUE, prob=ss.prob[na.omit(unique(NN[centers[gc],]))])
+      	}
+	}
+	 if (is.null(ss.prob)){
+		 newcenters <- trunc(runif(M, 0, numnn[centers])) + 1
+       }
+###################################################################	
 newcenters<- NN[cbind(centers,newcenters)]
    # these probabilities are needed in the Metrpolis "acceptance probability" calculation
    # since the proposal is not symmetric (i.e., near the boundary of the state-space)
@@ -670,7 +682,8 @@ sigma<- sqrt(1/(2*bsigma))
 if(Msexsigma == 0){
 sigmatmp<-c(sigma,sigma)
 bsigmatmp<-c(bsigma,bsigma)
-}else{
+}
+else{
 sigmatmp<-sigma
 bsigmatmp<-bsigma
 }
@@ -685,8 +698,8 @@ bsigmatmp<-bsigma
 
 logmu<- loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 mu<- ( 1-exp(-exp(logmu)))*z[indid]  # zeros out the z=0 guys so they contribute nothing
-mu.array = array(1-mu, dim = c(max(indid),max(repid),max(trapid)))
-mu.array[captures[,c(2,3,1)]] = 1-mu.array[captures[,c(2,3,1)]]
+mu.array <- array(1-mu, dim=c(max(indid),max(repid), max(trapid)))
+mu.aray[captures[,c(2,3,1)]] <- 1 - mu.array[captures[,c(2,3,1)]]
 newy<-rbinom(length(mu),1,mu)
 gof.stats<-cbind(y,newy,mu)
 gof.stats<-aggregate(gof.stats,list(indid),sum)
@@ -702,7 +715,7 @@ density<- sum(z)/totalarea
 
 zout[m,]<-z
 Sout[m,]<- centers
-LLout[m] <-prod(c(mu.array))
+LLout[m]<- prod(c(mu.array))
 out[m,]<-c(bsigmatmp[1],sigmatmp[1],bsigmatmp[2],sigmatmp[2],
 lam0, beta.behave, beta1,beta.sex,psi,psi.sex,sum(z),theta,beta.den,density)
 print(out[m,])
@@ -720,7 +733,7 @@ parms.2.report<-
     c(TRUE,TRUE,Msexsigma==1,Msexsigma==1,
 TRUE, Mb==1,
 Xeff.tf,
- Msex==1, TRUE, (Msex==1|Msexsigma==1), TRUE, update.theta,
+ Msex==1, TRUE, Msex==1, TRUE, update.theta,
 sum(Xd)>0,
 TRUE )
 
@@ -729,7 +742,7 @@ TRUE )
 #         ni=1100,burn=100,skip=2,nz=200,theta=NA,
 #         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL,
 
-out<- list(out=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout,Lout=LLout,statespace=statespace,gof.data=gof.data,gof.new=gof.new,call=call,parms2report=parms.2.report)
+out<- list(mcmchist=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout, likelihood=LLout,statespace=statespace,gof.data=gof.data,gof.new=gof.new,call=call,parms2report=parms.2.report)
 
 class(out) <- c("scrfit","list")
 
