@@ -2,9 +2,14 @@
 \alias{SCR.gof}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-x%%  ~~function to do ... ~~
+  Goodness-of-fit analysis for SCR model
+%%  ~~function to do ... ~~
 }
 \description{
+This function does a goodness-of-fit analysis of the "uniformity"
+assumption for the point process underlying an SCR model. It uses a
+standard "quadrat count" statistic based on binning points in the
+state-space.
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -13,7 +18,8 @@ SCR.gof(out, nx = 20, ny = 20, Xl = NULL, Xu = NULL, Yl = NULL, Yu = NULL)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{out}{
-%%     ~~Describe \code{out} here~~
+    Object of class "scrfit"
+    %%     ~~Describe \code{out} here~~
 }
   \item{nx}{
 %%     ~~Describe \code{nx} here~~
@@ -48,7 +54,7 @@ SCR.gof(out, nx = 20, ny = 20, Xl = NULL, Xu = NULL, Yl = NULL, Yu = NULL)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Andy Royle, aroyle@usgs.gov%%  ~~who you are~~
 }
 \note{
 %%  ~~further notes~~

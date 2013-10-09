@@ -1,7 +1,7 @@
 SCR.gof <-
 function(out,nx=20,ny=20,Xl=NULL,Xu=NULL,Yl=NULL,Yu=NULL){
 ## works with SCRf.fn output
-S<-out$Sout
+S<-out$mcmchist
 G<-out$G
 Sxout<-Syout<-matrix(NA,nrow=nrow(S),ncol=ncol(S))
 for(i in 1:nrow(S)){
@@ -19,7 +19,7 @@ Yu<-max(Syout)*1.001
 }
 xg<-seq(Xl,Xu,,nx)
 yg<-seq(Yl,Yu,,ny)
- 
+
 Sxout2<-cut(Sxout[z==1],breaks=xg)
 Syout2<-cut(Syout[z==1],breaks=yg)
 
@@ -40,8 +40,6 @@ Sysim<-sample(G[,2],sum(z[i,]),replace=TRUE)
 Dnsim<- table(cut(Sxsim,breaks=xg),cut(Sysim,breaks=yg))
 Dnsimv<-Dnsim[1:length(Dnsim)]
 statsim[i]<- (length(Dnsimv)-1)*(var(Dnsimv)/mean(Dnsimv))
-
-
 
 }
 

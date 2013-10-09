@@ -18,5 +18,5 @@ s[i,]<-apply(trps,2,mean)
 
 }
 points(s,pch=20,col="red")
-
+points(obj$statespace[obj$statespace[,3]==1,1:2],pch=".")
 }
