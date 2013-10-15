@@ -1,8 +1,10 @@
-SCRh.fn <-
+SCRi.fn <-
 function(scrobj,
          ni=1100,burn=100,skip=2,nz=200,theta=NA,
-         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL, ss.prob=NULL
+         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL, ss.prob=NULL,
 coord.scale=5000,area.per.pixel=1,thinstatespace=1,maxNN=20,dumprate=1000){
+
+# Added input vector ss.prob, which gives a proportional (RSF-like) weight to each node in the statespace
 
 call <- match.call()
 
@@ -75,6 +77,7 @@ nG<-nrow(G)
 
 new.area.per.pixel<- totalarea/nG
 
+# The following lines thin the statespace probability weights to match the thinned statespace
 #########################################################
 	if(!is.null(ss.prob)){
 		ss.prob = ss.prob[thinned]
@@ -276,7 +279,7 @@ psi<-.5  # not a good starting values
 psi.sex <- mean(Xsex,na.rm=TRUE)
 z<-c(rep(1,nind),rbinom(nz,1,psi))
 if(sum(sex.naflag)>0)
-Xsex[sex.naflag]<-rbinom(sum(sex.naflag),1,.65)
+Xsex[sex.naflag]<-rbinom(sum(sex.naflag),1,psi.sex) # modified 10/15/13 JFG - changed mean binom prob to mean of known pop. instead of .65
 
 if(is.null(Xd)){
       Xd<-rep(1,nG)
@@ -698,8 +701,11 @@ bsigmatmp<-bsigma
 
 logmu<- loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.sex*Xsex[indid]
 mu<- ( 1-exp(-exp(logmu)))*z[indid]  # zeros out the z=0 guys so they contribute nothing
+
+# JFG Added Oct. '13 these lines calculate the probability of observing the data given the parameter values
 mu.array <- array(1-mu, dim=c(max(indid),max(repid), max(trapid)))
-mu.aray[captures[,c(2,3,1)]] <- 1 - mu.array[captures[,c(2,3,1)]]
+mu.array[captures[,c(2,3,1)]] <- 1 - mu.array[captures[,c(2,3,1)]]
+
 newy<-rbinom(length(mu),1,mu)
 gof.stats<-cbind(y,newy,mu)
 gof.stats<-aggregate(gof.stats,list(indid),sum)
@@ -715,6 +721,7 @@ density<- sum(z)/totalarea
 
 zout[m,]<-z
 Sout[m,]<- centers
+# Compute the likelihood of the data given the model/parameter values
 LLout[m]<- prod(c(mu.array))
 out[m,]<-c(bsigmatmp[1],sigmatmp[1],bsigmatmp[2],sigmatmp[2],
 lam0, beta.behave, beta1,beta.sex,psi,psi.sex,sum(z),theta,beta.den,density)
@@ -733,16 +740,16 @@ parms.2.report<-
     c(TRUE,TRUE,Msexsigma==1,Msexsigma==1,
 TRUE, Mb==1,
 Xeff.tf,
- Msex==1, TRUE, Msex==1, TRUE, update.theta,
+ Msex==1, TRUE, (Msex==1|Msexsigma==1), TRUE, update.theta,
 sum(Xd)>0,
-TRUE )
+TRUE ) # JFG 10/15/13 edited so that psi.sex is included if Msexsigma = 1.
 
 
 #model
 #         ni=1100,burn=100,skip=2,nz=200,theta=NA,
 #         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL,
 
-out<- list(mcmchist=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout, likelihood=LLout,statespace=statespace,gof.data=gof.data,gof.new=gof.new,call=call,parms2report=parms.2.report)
+out<- list(mcmchist=out,G=G,Gunscaled=Gunscaled,traplocs=traplocs,Sout=Sout,zout=zout, likelihood=LLout,statespace=statespace,gof.data=gof.data,gof.new=gof.new,call=call,parms2report=parms.2.report) # JFG edited to return the likelihood
 
 class(out) <- c("scrfit","list")
 
