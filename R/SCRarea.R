@@ -26,9 +26,9 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Xeff=NULL, Xd=NULL, Xsex = NULL
 	
 	# if iter is a character defining a functioning passed to apply...
 	if (is.character(iter)&iter!="all"){
-		param.values = apply(obj$out,2,iter)
-		param.values = array(param.values,c(ifelse(is.matrix(param.values),nrow(param.values),1),ncol(obj$out)))
-		colnames(param.values) = colnames(obj$out)
+		param.values = apply(obj$mcmchist,2,iter)
+		param.values = array(param.values,c(ifelse(is.matrix(param.values),nrow(param.values),1),ncol(obj$mcmchist)))
+		colnames(param.values) = colnames(obj$mcmchist)
 		# These lines select the location of the activity centers from the iteration
 		# that is closest to the desired total number of animals
 		# In case of a tie, the selection is made randomly from the equivalent candidates
@@ -42,13 +42,13 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Xeff=NULL, Xd=NULL, Xsex = NULL
 	
 	# If iter is a numeric giving which iterations of the chain to work with...
 	if (is.numeric(iter)){
-		param.values = obj$out[iter,]
+		param.values = obj$mcmchist[iter,]
 		n.animals.iter = gridchain[,iter]
 	}
 	# Finally, iter can specify all values from the MCMC chain
 	# I use this as the null/default option
 	if (iter =="all"|is.null(iter)){
-		param.values - obj$out
+		param.values - obj$mcmchist
 		n.animals.iter = gridchain
 	}
 	# String together necessary info to be passed to internal function (below)
