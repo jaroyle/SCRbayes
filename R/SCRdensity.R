@@ -1,6 +1,6 @@
 SCRdensity <-
 function(obj,nx=30,ny=30,Xl=NULL,Xu=NULL,Yl=NULL,Yu=NULL,
-scalein=1,scaleout=1000000*100,ncolors=10){
+scalein=1,scaleout=1000000*100,ncolors=10, method = 1){
 ## 1000000 scaleout puts density in units per km^2
 ## multiplied by 100 is units per 100 km^2
 ## assumes units input are meters.
