@@ -1,8 +1,7 @@
 SCRh.bf <-
 function(scrobj,
          ni=1100,burn=100,skip=2,nz=200,theta=NA,
-         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL, ss.prob = NULL
-coord.scale=5000,area.per.pixel=1,thinstatespace=1,maxNN=20,dumprate=1000){
+         Msigma=1,Mb=0,Msex=0,Msexsigma = 0,Xeff=NULL,Xsex=NULL, ss.prob = NULL,coord.scale=5000,area.per.pixel=1,thinstatespace=1,maxNN=20,dumprate=1000){
 
 call <- match.call()
 

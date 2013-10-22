@@ -145,8 +145,8 @@ below. See also the help file ?wolverine
 
 }
 \author{
-Andy Royle  and Robin Russell  and Chris Sutherland and OTHERS to be identified
-
+  Andy Royle and Robin Russell and Chris Sutherland and Josh Goldberg
+  
 Maintainer: Andy Royle, aroyle@usgs.gov
 
 SIGN UP FOR THIS GOOGLE EMAIL LIST: 
