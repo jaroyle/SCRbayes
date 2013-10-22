@@ -10,7 +10,7 @@ functions of SCRbayes (e.g., SCRh.fn, SCRi.fn)
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-SCRdensity(obj, nx = 30, ny = 30, Xl = NULL, Xu = NULL, Yl = NULL, Yu = NULL, scalein = 1, scaleout = 100000*100, ncolors = 10)
+SCRdensity(obj, nx = 30, ny = 30, Xl = NULL, Xu = NULL, Yl = NULL, Yu = NULL, scalein = 1, scaleout = 100000*100, ncolors = 10,opt.ss=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -44,6 +44,10 @@ should be of class scrfit  %%     ~~Describe \code{obj} here~~
   \item{ncolors}{
 %%     ~~Describe \code{ncolors} here~~
 }
+\item{opt.ss=FALSE}{
+If TRUE the density plot has support on the input state-space grid. If
+FALSE (default) the binning method is used. 
+  }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~

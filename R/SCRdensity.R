@@ -19,7 +19,7 @@ if (!opt.ss){
 	Syout[i,]<-obj$statespace[tmp,2]
 	}
 
-	}
+    }
 	else{
 	# below lines of code for SCRbook examples
 	Sxout<-obj$Sx
