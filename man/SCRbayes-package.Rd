@@ -151,7 +151,10 @@ below. See also the help file ?wolverine
   
 Maintainer: Andy Royle, aroyle@usgs.gov
 
-SIGN UP FOR THIS GOOGLE EMAIL LIST: 
+Google group: For questions about this function or spatial
+capture-recapture in general, please sign up for the Google group here:
+https://groups.google.com/d/forum/spatialcapturerecapture
+
 }
 \references{
 The code originates from Royle et al. (2009) which was developed a
