@@ -2,6 +2,8 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Xeff=NULL, Xd=NULL, Xsex = NULL
 	# Some basic error checking on behavioral covariates
 	# The expectations on this input likely need some further thought. 
 	# I allow either a global or trap-specific value	
+	require(raster)
+	require(sp)
 	if (Mb==1){ 
 		if(!is.numeric(Mbvalue)) {
 			cat("Error: Please supply a numeric value for behavioral capture effect", fill=T)
@@ -25,7 +27,7 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Xeff=NULL, Xd=NULL, Xsex = NULL
 	#n.animals=apply(gridchain,2,sum)
 	
 	# if iter is a character defining a functioning passed to apply...
-	if (is.character(iter)&iter!="all"){
+	if (any(is.character(iter))&iter!="all"){
 		param.values = apply(obj$mcmchist,2,iter)
 		param.values = array(param.values,c(ifelse(is.matrix(param.values),nrow(param.values),1),ncol(obj$mcmchist)))
 		colnames(param.values) = colnames(obj$mcmchist)
@@ -41,14 +43,14 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Xeff=NULL, Xd=NULL, Xsex = NULL
 	}
 	
 	# If iter is a numeric giving which iterations of the chain to work with...
-	if (is.numeric(iter)){
+	if (any(is.numeric(iter))){
 		param.values = obj$mcmchist[iter,]
-		n.animals.iter = gridchain[,iter]
+		n.animals.iter = gridchain[iter,]
 	}
 	# Finally, iter can specify all values from the MCMC chain
 	# I use this as the null/default option
-	if (iter =="all"|is.null(iter)){
-		param.values - obj$mcmchist
+	if (any(c(iter =="all",is.null(iter)))){
+		param.values = obj$mcmchist
 		n.animals.iter = gridchain
 	}
 	# String together necessary info to be passed to internal function (below)
@@ -66,25 +68,26 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Xeff=NULL, Xd=NULL, Xsex = NULL
 		Mb = inputs$Mb
 		Mbvalue = inputs$Mbvalue
 		Xd =inputs$Xd
-	
+	print(i)
 	# Calculate sigma and baseline detection probability
 	# Use weighted mean when no/NULL Xsex specified  
 	if (is.null(Xsex)){
 	sigma <- weighted.mean(c(param.values[i,1],param.values[i,3]),c(1-param.values[i,"psi.sex"],param.values[i,"psi.sex"]))
 	# Calculate baseline detection probability
 	# Again, I use a weighted avg for sex-based differences
-	lam0 = exp(log(param.values[i,"lam0"]) + param.values[i,"psi.sex"]*param.values[i,"beta.sex"])
+	loglam0 =(log(param.values[i,"lam0"]) + param.values[i,"psi.sex"]*param.values[i,"beta.sex"])
 	} else { # When Xsex is specified calculate exposure probability for given sex
 	sigma <- c(param.values[i,1],param.values[i,3])[Xsex+1]
 	# Calculate baseline detection probability
 	# Again, I use a weighted avg for sex-based differences
-	lam0 = exp(log(param.values[i,"lam0"]) + Xsex*param.values[i,"beta.sex"])	
+	loglam0 =(log(param.values[i,"lam0"]) + Xsex*param.values[i,"beta.sex"])	
 	}
 	# Reconstruct the trap locations on the original scale
-	ss.x <- unique(obj$statespace$X_coord)
-	ss.y <- rev(unique(obj$statespace$Y_coord))
+	ss.x <- sort(unique(obj$statespace$X_coord))
+	ss.y <- rev(sort(unique(obj$statespace$Y_coord)))
 	coord.scale <- ((obj$Gunscaled[,1]-min(obj$Gunscaled[,1]))/(obj$G[,1]-min(obj$G[,1])))[nrow(obj$Gunscaled)]
 	traplocs.utm = data.frame(t((t(as.matrix(obj$traplocs))-apply(obj$G,2,min))*coord.scale + apply(obj$Gunscaled,2,min)))
+	
 	
 	# Create matrix to store the probability of capture in any trap given the 
 	# location of activity center
@@ -99,19 +102,27 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Xeff=NULL, Xd=NULL, Xsex = NULL
 		    lp.behav = ifelse(Mb==0,0, Mb*Mbvalue*param.values[i,"beta.behave"])
 		    lp.dens = ifelse(is.null(Xd),0,(Xd[obj$statespace$X_coord==x&obj$statespace$Y_coord==y]*param.values[i,"beta.density"]/(log(sum(exp(Xd*param.values[i,"beta.density"]))))))
 		    # Add all the lps, convert to probability of capture in a trap
-		    prob.cap <-1 - exp(-lam0*exp(-sigma*(temp.dist/coord.scale)^(2*param.values[i,"theta"])+lp.eff+lp.behav+lp.dens ))
+		    prob.cap <-1 - exp(-exp(loglam0-sigma*(temp.dist/coord.scale)^(2*param.values[i,"theta"])+lp.eff+lp.behav+lp.dens ))
 		    # Store probability of capture in ANY trap 
 		    prob.anycap[which(ss.y==y), which(ss.x==x)] <- 1- prod(1-prob.cap)^SO
 		  }
 		}
 		# Find Resolution of statespace
-		ss.res = c(as.numeric(names(table(diff(ss.x)))),as.numeric(names(table(diff(rev(ss.y))))))
+		ss.res = c(unique(round(as.numeric(names(table(diff(sort(ss.x))))))),unique(round(as.numeric(names(table(diff(sort(ss.y))))))))
+		prob.rast = raster(prob.anycap, xmn = min(obj$statespace$X_coord)-ss.res[1]/2, xmx=max(obj$statespace$X_coord)+ss.res[1]/2, ymn=min(obj$statespace$Y_coord)-ss.res[2]/2, ymx=max(obj$statespace$Y_coord)+ss.res[2]/2)
+		res(prob.rast) = ss.res
+		n.animalsr.iter = raster(nrows = length(unique(obj$statespace$Y_coord)), ncols = length(unique(obj$statespace$X_coord)),xmn = min(obj$statespace$X_coord)-ss.res[1]/2, xmx=max(obj$statespace$X_coord)+ss.res[1]/2, ymn=min(obj$statespace$Y_coord)-ss.res[2]/2, ymx=max(obj$statespace$Y_coord)+ss.res[2]/2)
+		res(n.animalsr.iter) = ss.res
+		
+		ss.sp <- SpatialPointsDataFrame(obj$statespace[,1:2],data=data.frame('n.animals'=n.animals.iter[i,]))
+		# Making abundance raster
+		n.animalsr.iter <- rasterize(ss.sp, n.animalsr.iter, 'n.animals')
 		# Calculate density scaling factor
 		# Effective area
 		area.iter <- sum(prob.anycap)*(prod(ss.res/scalein))
-		popcontrib.iter <- matrix(n.animals.iter[i,],nrow = length(ss.y),ncol=length(ss.x),byrow=F)*apply(prob.anycap,2,rev)
+		popcontrib.iter <- n.animalsr.iter*prob.rast
 		# Effective number of exposed individuals
-		ngrid.iter <- sum(popcontrib.iter)
+		ngrid.iter <- cellStats(popcontrib.iter,'sum')
 		# Compute density, scaling to /100 km^2
 		density.iter <- ngrid.iter/area.iter *(scaleout/scalein)
 		out1 = list("chain"=c(param.values[i,], "area"=area.iter,"Ngrid"=ngrid.iter,"density"=density.iter),"prob.anycap"=prob.anycap)
@@ -122,6 +133,8 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Xeff=NULL, Xd=NULL, Xsex = NULL
 	if (useSnowfall){
 		require(snowfall)
 		sfInit(parallel=TRUE, cpus=nprocs,type=con.type)
+		sfLibrary(sp)
+		sfLibrary(raster)
 		sfExport("postProb")
 		
 		out1 = sfLapply(1:nrow(param.values),postProb,inputs)

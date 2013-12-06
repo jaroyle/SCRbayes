@@ -316,7 +316,7 @@ out<-matrix(NA,nrow=(ni-burn)/skip,ncol=14)
 dimnames(out)<-list(NULL,c("bsigma","sigma","bsigma2","sigma2","lam0","beta.behave","beta1(effort)","beta.sex","psi","psi.sex","Nsuper","theta","beta.density","D"))
 zout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
 Sout<-matrix(NA,nrow=(ni-burn)/skip,ncol=M)
-LLout<-rep(NA, (ni-burn)/skip)
+LLout<-matrix(NA, nrow=(ni-burn)/skip,ncol=2)
 m<-1
 
 # edits 8/14/2013
@@ -703,8 +703,15 @@ logmu<- loglam0 + Mb*beta.behave*prevcap - lp.sigma + beta1*Xeff  + Msex*beta.se
 mu<- ( 1-exp(-exp(logmu)))*z[indid]  # zeros out the z=0 guys so they contribute nothing
 
 # JFG Added Oct. '13 these lines calculate the probability of observing the data given the parameter values
+#logmu.array <- array(log(exp(-exp(logmu)))*z[indid], dim=c(max(indid),max(repid), max(trapid)))
+#logmu.array[as.matrix(captures[,c(2,3,1)])] <- array(log(1-exp(-exp(logmu)))*z[indid], dim=c(max(indid),max(repid), max(trapid)))[as.matrix(captures[,c(2,3,1)])]
+#logmu.array[is.infinite(logmu.array)]=.Machine$double.min.exp
 mu.array <- array(1-mu, dim=c(max(indid),max(repid), max(trapid)))
-mu.array[captures[,c(2,3,1)]] <- 1 - mu.array[captures[,c(2,3,1)]]
+mu.array[as.matrix(captures[,c(2,3,1)])] <- 1 - mu.array[as.matrix(captures[,c(2,3,1)])]
+logmu.array = log(mu.array)
+n.nolik = sum(is.infinite(logmu.array))
+logmu.array[is.infinite(logmu.array)]=.Machine$double.min.exp
+
 
 newy<-rbinom(length(mu),1,mu)
 gof.stats<-cbind(y,newy,mu)
@@ -722,7 +729,7 @@ density<- sum(z)/totalarea
 zout[m,]<-z
 Sout[m,]<- centers
 # Compute the likelihood of the data given the model/parameter values
-LLout[m]<- prod(c(mu.array))
+LLout[m,]<- c(sum(logmu.array), n.nolik)#prod(c(mu.array))
 out[m,]<-c(bsigmatmp[1],sigmatmp[1],bsigmatmp[2],sigmatmp[2],
 lam0, beta.behave, beta1,beta.sex,psi,psi.sex,sum(z),theta,beta.den,density)
 print(out[m,])

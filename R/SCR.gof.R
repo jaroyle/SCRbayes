@@ -1,7 +1,7 @@
 SCR.gof <-
 function(out,nx=20,ny=20,Xl=NULL,Xu=NULL,Yl=NULL,Yu=NULL){
 ## works with SCRf.fn output
-S<-out$mcmchist
+S<-out$S
 G<-out$G
 Sxout<-Syout<-matrix(NA,nrow=nrow(S),ncol=ncol(S))
 for(i in 1:nrow(S)){

@@ -10,7 +10,8 @@
 SCR.bf = function(modelsin, refmodel=NULL){
 	require(mvtnorm)
 	nmodels = length(modelsin)
-	model.lik <- maxL <-avgL<- medL<- rep(NA, nmodels)
+	model.lik <-model.lik2 <- cumLL<- maxL <-avgL<- medL<- rep(NA, nmodels)
+	LLsamples <-LLs<- matrix(nrow=length(modelsin[[1]]$Lout),ncol=nmodels)
 	for (i in 1:nmodels){
 		model = modelsin[[i]]
 		model.post = model$out[,model$parms2report]
@@ -26,13 +27,14 @@ SCR.bf = function(modelsin, refmodel=NULL){
 		for (c in 1:ncol(model.post)){
 			chain.dens[,c]=emp.dens[[c]][,2][findInterval(model.post[,c],emp.dens[[c]][,1])]
 		}
-		f.samples = dmvt(model.post,delta=post.avg, sigma=cov2cor(post.var), df=nrow(model.post),log=F)
-		model.lik[i] = (1/nrow(model.post)*sum(f.samples/(model$Lout*apply(chain.dens,1,prod))))^(-1)
-		maxL[i] = max(model$Lout)
-		avgL[i] = mean(model$Lout) 
-		medL[i] = median(model$Lout)
+		f.samples = dmvt(model.post,delta=post.avg, sigma=cov2cor(post.var), df=nrow(model.post),log=T)
+		model.lik[i] = (1/nrow(model.post)*sum(exp(f.samples-(model$Lout+log(apply(chain.dens,1,prod))))))^(-1)
+		
+#		maxL[i] = max(model$likelihood)
+#		avgL[i] = mean(model$likelihood) 
+#		medL[i] = median(model$likelihood)
 	}
-	post.prob = model.lik/sum(model.lik)
+	post.prob =(model.lik)/sum((model.lik))
 	names(model.lik) <- names(modelsin)
 	if(!is.null(refmodel)){
 	bf = model.lik/model.lik[refmodel]
