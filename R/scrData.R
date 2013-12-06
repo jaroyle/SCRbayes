@@ -1,5 +1,5 @@
 scrData <-
-function(traps,captures,statespace,alive=NULL,Xd=NULL){
+function(traps,captures,statespace,alive=NULL,Xd=NULL,Ytel=NULL){
 
 # do some stuff
 # check traps.lions: [,1] = id, integer, [,2]=x coord [,3]=y coord [,4]=binary only
@@ -75,7 +75,12 @@ if(any(check2 != 1)){
     return("goose egg")
 }
 
-
+if(!is.null(Ytel)){
+  if ( nrow(Ytel)!= nrow(statespace)){
+       cat("Failure: nrow(Ytel) must equal nrow(statespace)",fill=TRUE)
+       return(NULL)
+       }
+}
 
 
 ##################
@@ -88,7 +93,8 @@ obj<-list(
     captures=captures,
     statespace=statespace,
     alive=alive,
-    Xd=Xd)
+    Xd=Xd,
+    Ytel=Ytel)
 
 class(obj)<-c("scrdata","list")
 

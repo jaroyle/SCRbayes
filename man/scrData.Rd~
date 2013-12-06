@@ -99,16 +99,17 @@ Andy Royle %%  ~~who you are~~
 
 ## The function is currently defined as
 
-
 library("SCRbayes")
 data(lions)
-#traps.lions<-read.csv("traps_lions.csv")
-#captures.lions<-read.csv("captures_lions.csv")
-#statespace.lions<-read.csv("statespace_lions.csv")
-dimnames(captures.lions)<-list(1:nrow(captures.lions),c("trapid","individual","occasion"))
 
-lion.scrdata<- scrData(traps.lions,captures.lions,statespace.lions)
+dimnames(captures.lions)<-
+   list(1:nrow(captures.lions),c("trapid","individual","occasion"))
 
+lion.scrdata <- scrData(traps.lions,captures.lions,statespace.lions)
+
+test <- SCRh.fn(lion.scrdata,ni=220, burn=20,
+ skip=2,nz=200,Msigma=1, Mb=0, Msex=0, Msexsigma=0, 
+ Xeff=NULL, Xsex=NULL, thinstatespace=2)
 
 
 

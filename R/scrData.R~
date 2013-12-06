@@ -39,7 +39,7 @@ ntraps<-nrow(traplocs)
 
 if(is.null(alive))
 alive=matrix(1,nrow=length(unique(captures[,"individual"])),ncol=ncol(MASK))
-if(is.null(Xd)) Xd<- rep(1,nrow(statespace))
+if(is.null(Xd)) Xd<- rep(0,nrow(statespace))
 
 
 

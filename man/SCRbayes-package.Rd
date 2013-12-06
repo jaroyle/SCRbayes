@@ -120,13 +120,15 @@ individual is using the space around the parking lot, then its center of
 activity might well be on the parking lot even if it is subjectively
 believed to be "non-habitat" by a biologist. 
 
-You should convert your statespace grid to an object of class
-"statespace" using the as.statespace() function.
-XXXXX NOT YET IMPLEMENTED XXXXXXXX
+%%You should convert your statespace grid to an object of class
+%%"statespace" using the as.statespace() function.
+X%%XXXX NOT YET IMPLEMENTED XXXXXXXX
 
 If you don't have a state-space grid you can easily make one using the
-make.statespace function. See ?statespace or ?make.statespace
-XXXXX NOT FLESHED-OUT YET XXXXXXXX 
+make.statespace function. See ?statespace or ?make.statespace. See the
+example below. 
+
+
 
 3. 
 You need some encounter data from an actual study that you did which is
@@ -145,11 +147,14 @@ below. See also the help file ?wolverine
 
 }
 \author{
-Andy Royle  and Robin Russell  and Chris Sutherland and OTHERS to be identified
-
+  Andy Royle and Robin Russell and Chris Sutherland and Josh Goldberg
+  
 Maintainer: Andy Royle, aroyle@usgs.gov
 
-SIGN UP FOR THIS GOOGLE EMAIL LIST: 
+Google group: For questions about this function or spatial
+capture-recapture in general, please sign up for the Google group here:
+https://groups.google.com/d/forum/spatialcapturerecapture
+
 }
 \references{
 The code originates from Royle et al. (2009) which was developed a
@@ -200,6 +205,59 @@ test <- SCRh.fn(lion.scrdata,ni=220, burn=20,
 ### summarize the output
 
 print(test, digits = 2)
+
+####
+####
+####  Wolverine data 
+####
+
+
+
+data(wolverine)
+
+## make the encounter data file (EDF)
+EDF<-wolverine$wcaps
+dimnames(EDF)<-list(NULL,c("session","individual","occasion","trapid"))
+## grab the trap deployment file (TDF)
+TDF<-wolverine$wtraps
+
+## bundle these into an "scrdata" object along with the state-space grid
+#### wolverine data has a state-space grid 
+#####grid<-cbind(wolverine$grid2,rep(1,nrow(wolverine$grid2)))
+### But lets make one up using the make.statespace function
+
+grid<- make.statespace(TDF[,2:3],buffer=.1)
+grid<-cbind(grid,rep(1,nrow(grid)))
+wolv.scrdata<-scrData(TDF,EDF,grid)
+
+## we will fit a model with sex-specific parameters, so grab the sex variable
+wsex<-wolverine$wsex
+
+## now fit a model using the current development version of
+##   the fitting function
+test<-SCRh.fn( wolv.scrdata,ni= 1200, burn=200, skip=2,nz=100,theta=.5,
+Msigma=1, Mb=0, Msex=1, Msexsigma=1, 
+coord.scale=5000, Xeff=NULL, Xsex=wsex, thinstatespace=4)
+
+## print a summary 
+print(test, digits=3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
