@@ -1,5 +1,7 @@
 scrData <-
-function(traps,captures,statespace,alive=NULL,Xd=NULL){
+function(traps,captures,statespace,alive=NULL,
+         Xsex=NULL,
+         Xd=NULL,Xeff=NULL, Ytel=NULL, Xtel=NULL){
 
 # do some stuff
 # check traps.lions: [,1] = id, integer, [,2]=x coord [,3]=y coord [,4]=binary only
@@ -39,7 +41,7 @@ ntraps<-nrow(traplocs)
 
 if(is.null(alive))
 alive=matrix(1,nrow=length(unique(captures[,"individual"])),ncol=ncol(MASK))
-if(is.null(Xd)) Xd<- rep(0,nrow(statespace))
+if(is.null(Xd)) Xd<- rep(1,nrow(statespace))
 
 
 
@@ -75,7 +77,16 @@ if(any(check2 != 1)){
     return("goose egg")
 }
 
-
+if(!is.null(Ytel)){
+  if ( nrow(Ytel)!= nrow(statespace)){
+       cat("Failure: nrow(Ytel) must equal nrow(statespace)",fill=TRUE)
+       return(NULL)
+       }
+}
+if(!is.list(Xtel)){
+       cat("Failure: Xtel must be a list with coordinates and raster values")
+       return(NULL)
+       }
 
 
 ##################
@@ -88,7 +99,12 @@ obj<-list(
     captures=captures,
     statespace=statespace,
     alive=alive,
-    Xd=Xd)
+    Xsex=Xsex,
+    Xd=Xd,
+    Xeff=Xeff,
+    Ytel=Ytel,
+    Xtel = Xtel)
+
 
 class(obj)<-c("scrdata","list")
 

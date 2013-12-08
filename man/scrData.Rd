@@ -61,10 +61,12 @@ whether individual were removed or not, without error.
 The matrix should be "nind x noccasions". 
 %%     ~~Describe \code{alive} here~~
 }
-  \item{Xd}{
+\item{Xsex}{ sex variable }
+\item{Xd}{
 A "density covariate" -- should be a vector of "ngrid x 1" where ngrid = nrow(statespace). 
 %%     ~~Describe \code{Xd} here~~
 }
+\item{Xeff}{ trap level covariate "effort" or habitat covariate }
 \item{Ytel}{
  Telemetry data on a sample of individuals. 
  This must be an "ngrix x Ntel" matrix of count frequencies where
@@ -76,6 +78,10 @@ A "density covariate" -- should be a vector of "ngrid x 1" where ngrid = nrow(st
   are MANDATORY but only for expediency on my end
  of things. 
   }
+  \item{Xtel}{
+    habitat covariate for telemetry data. right now this has to be the
+    same dimension as Xd , i.e., length = size of state-space. 
+    }
 }
 \details{
 more to come .... %%  ~~ If necessary, more details than the description above ~~

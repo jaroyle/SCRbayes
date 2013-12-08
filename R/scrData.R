@@ -1,5 +1,7 @@
 scrData <-
-function(traps,captures,statespace,alive=NULL,Xd=NULL,Ytel=NULL){
+function(traps,captures,statespace,alive=NULL,
+         Xsex=NULL,
+         Xd=NULL,Xeff=NULL, Ytel=NULL, Xtel=NULL){
 
 # do some stuff
 # check traps.lions: [,1] = id, integer, [,2]=x coord [,3]=y coord [,4]=binary only
@@ -39,7 +41,7 @@ ntraps<-nrow(traplocs)
 
 if(is.null(alive))
 alive=matrix(1,nrow=length(unique(captures[,"individual"])),ncol=ncol(MASK))
-if(is.null(Xd)) Xd<- rep(0,nrow(statespace))
+if(is.null(Xd)) Xd<- rep(1,nrow(statespace))
 
 
 
@@ -81,7 +83,43 @@ if(!is.null(Ytel)){
        return(NULL)
        }
 }
+if(!is.list(Xtel)){
+       cat("Failure: Xtel must be a list with coordinates and raster values")
+       return(NULL)
+       }
 
+
+if(!is.null(Xsex)){
+
+    # if sex is provided then do 2 checks: (1) has to be binary and (2) sex has to be provided for telemetry data
+if(!is.numeric(Xsex)){
+cat("Error, sex needs to be binary",fill=TRUE)
+return(NULL)
+}
+
+if(is.null(    attributes(Ytel)$sex)){
+cat("Error: no sex information for telemetry data. Add this as an attribute.",fill=TRUE)
+return(NULL)
+}
+
+
+}
+
+### now right here I need to process the telemetry data
+## format should always be a matrix of track locations with individual ID
+    ### X Y individual
+    ## case 1: Ytel but no Xtel. Bin X,Y values into a fine grid.
+    ## case 2: if Xtel is provided then that has to define the grid to bin X,Y values
+
+  if(!is.null(Ytel)){
+
+ if(is.null(Xtel)){
+      tel.gr<-    make.statespace(ll = statespace, buffer = 0.01, nx = 40)
+        }
+if(!is.null(Xtel)){
+}
+
+}
 
 ##################
 ##################
@@ -93,8 +131,12 @@ obj<-list(
     captures=captures,
     statespace=statespace,
     alive=alive,
+    Xsex=Xsex,
     Xd=Xd,
-    Ytel=Ytel)
+    Xeff=Xeff,
+    Ytel=Ytel,
+    Xtel = Xtel)
+
 
 class(obj)<-c("scrdata","list")
 

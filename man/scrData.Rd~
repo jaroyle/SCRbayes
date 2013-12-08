@@ -65,6 +65,17 @@ The matrix should be "nind x noccasions".
 A "density covariate" -- should be a vector of "ngrid x 1" where ngrid = nrow(statespace). 
 %%     ~~Describe \code{Xd} here~~
 }
+\item{Ytel}{
+ Telemetry data on a sample of individuals. 
+ This must be an "ngrix x Ntel" matrix of count frequencies where
+ Ytel[j,i] is the frequency of telemetry fixes in pixel j for individual
+ i. The number of ROWS of Ytel must be the same dimension as the
+ state-space grid and therefore the telemetry data MUST BE
+ pre-binned. Obviously covariates for the RSF model have to correspond
+ to the state-space grid also. Right now these formatting requirements
+  are MANDATORY but only for expediency on my end
+ of things. 
+  }
 }
 \details{
 more to come .... %%  ~~ If necessary, more details than the description above ~~
@@ -79,6 +90,12 @@ an object of class "scrdata"
 }
 \references{
 %% ~put references to the literature/web site here ~
+For the use of telemetry data see the paper:
+
+
+Royle, J.A., R.B. Chandler, C.C. Sun and A.K. Fuller. 
+(2013). Integrating resource selection information with spatial
+capture-recapture. Methods in Ecology and Evolution, 3:545-554.
 }
 \author{
 Andy Royle %%  ~~who you are~~
