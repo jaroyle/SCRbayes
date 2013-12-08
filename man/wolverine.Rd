@@ -85,18 +85,19 @@ dimnames(EDF)<-list(NULL,c("session","individual","occasion","trapid"))
 ## grab the trap deployment file (TDF)
 TDF<-wolverine$wtraps
 
-## bundle these into an "scrdata" object along with the state-space grid
-grid<-cbind(wolverine$grid2,rep(1,nrow(wolverine$grid2)))
-wolv.scrdata<-scrData(TDF,EDF,grid)
-
 ## we will fit a model with sex-specific parameters, so grab the sex variable
 wsex<-wolverine$wsex
 
+## bundle these into an "scrdata" object along with the state-space grid
+grid<-cbind(wolverine$grid2,rep(1,nrow(wolverine$grid2)))
+wolv.scrdata<-scrData(TDF,EDF,grid,Xsex=wsex)
+
 ## now fit a model using the current development version of
-##   the fitting function
+##   the fitting function. Probably should have theta = 1 here....
+
 test<-SCRh.fn( wolv.scrdata,ni= 1200, burn=200, skip=2,nz=100,theta=.5,
-Msigma=1, Mb=0, Msex=1, Msexsigma=1, 
-coord.scale=5000, Xeff=NULL, Xsex=wsex, thinstatespace=4)
+               Msigma=1, Mb=0, Msex=1, Msexsigma=1, 
+               coord.scale=5000, thinstatespace=4)
 
 ## print a summary 
 print(test, digits=3)

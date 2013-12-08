@@ -12,20 +12,26 @@
 \usage{data(telemetry)}
 \format{
    The format is:
-List of 7
+ List of 7
  $ Y         : int [1:53, 1:12, 1:120] 0 0 0 0 0 0 0 0 0 1 ...
+
  $ MASK      : num [1:120, 1:12] 1 1 1 1 1 1 1 1 1 1 ...
+
  $ traplocs  : num [1:120, 1:2] 125 126 125 124 125 ...
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr [1:120] "1" "2" "3" "4" ...
   .. ..$ : chr [1:2] "x" "y"
+
  $ Xss       : num [1:947, 1] -0.566 -0.292 -0.174 0.607 -0.21 ...
+
  $ Ytel      : num [1:1200, 1:3] 126 126 126 126 126 ...
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : NULL
   .. ..$ : chr [1:3] "" "" "i"
   ..- attr(*, "sex")= int [1:12] 0 1 0 1 0 0 1 1 1 1 ...
+
  $ Xsex      : int [1:53] 0 1 1 0 1 1 1 0 0 0 ...
+
  $ statespace: num [1:947, 1:3] 122 122 122 123 123 ...
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr [1:947] "1" "2" "3" "4" ...
@@ -58,9 +64,19 @@ individuals ARE NOT RECONCILED and assumed to be independent.
   %%  ~~ reference to a publication or URL from which the data were obtained ~~
 }
 \references{
-%%  ~~ possibly secondary sources and usages ~~
+
+Sollmann, R., Gardner, B., Chandler, R. B., Shindle, D. B., Onorato,
+D. P., Royle, J. A., & O'Connell, A. F. (2013). Using multiple data
+sources provides density estimates for endangered Florida
+panther. Journal of Applied Ecology.
+
+Royle, J. A., Chandler, R. B., Sun, C. C., & Fuller,
+A. K. (2013). Integrating resource selection information with spatial
+capture-recapture. Methods in Ecology and Evolution.
+
 }
 \examples{
+
 
 ### Here is how the data were simulated
 data(tigerdata)
@@ -73,7 +89,8 @@ ssgrid[,3]<- rep(1,nrow(ssgrid))
 set.seed(2014)
 D<-e2dist(ssgrid,ssgrid)
 V<- exp(-D/2)
-x<- t(chol(V))%*%rnorm(nrow(ssgrid))
+x<-t(chol(V))\%*\%rnorm(nrow(ssgrid))
+
 
 ## Plot the covariate
 par(mar=c(3,3,3,6))

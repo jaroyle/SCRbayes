@@ -2,10 +2,10 @@
 \alias{tigerdata}
 \docType{data}
 \title{
-%%   ~~ data name/kind ... ~~
+tiger data from Nagarahole.%%   ~~ data name/kind ... ~~
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of the dataset. ~~
+only the trap locations and a statespace grid%%  ~~ A concise (1-5 lines) description of the dataset. ~~
 }
 \usage{data(tigerdata)}
 \format{

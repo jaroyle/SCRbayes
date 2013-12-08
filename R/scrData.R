@@ -74,19 +74,20 @@ check<-cbind(captures[,"trapid"],captures[,"occasion"])
 check2<- MASK[check]
 if(any(check2 != 1)){
     cat("Some trap operation data != 1",fill=TRUE)
-    return("goose egg")
+    return(NULL)
 }
 
-if(!is.null(Ytel)){
-  if ( nrow(Ytel)!= nrow(statespace)){
-       cat("Failure: nrow(Ytel) must equal nrow(statespace)",fill=TRUE)
-       return(NULL)
-       }
-}
-if(!is.list(Xtel)){
-       cat("Failure: Xtel must be a list with coordinates and raster values")
-       return(NULL)
-       }
+
+#if(!is.null(Ytel)){
+#  if ( nrow(Ytel)!= nrow(statespace)){
+#       cat("Failure: nrow(Ytel) must equal nrow(statespace)",fill=TRUE)
+#       return(NULL)
+#       }
+#}
+#if(!is.list(Xtel)){
+#       cat("Failure: Xtel must be a list with coordinates and raster values")
+#       return(NULL)
+#       }
 
 
 if(!is.null(Xsex)){
@@ -112,11 +113,30 @@ return(NULL)
     ## case 2: if Xtel is provided then that has to define the grid to bin X,Y values
 
   if(!is.null(Ytel)){
+      if(ncol(Ytel)!=3) {
+          cat("Ytel should have columns: X, Y, individual",fill=TRUE)
+          return(NULL)
+          }
+      
+sbar<- aggregate(Ytel[,1:2],by=list(Ytel[,3]),mean)
+attr(Ytel,"sbar")<- sbar[,2:3]
 
  if(is.null(Xtel)){
-      tel.gr<-    make.statespace(ll = statespace, buffer = 0.01, nx = 40)
+     # need average coordinate of each guy == home range center
+     #  need distance of each location TO that guy's home range center. Can compute normalizing constant directly     
+     #     1/(2pi sigmax sigmay)
+
         }
 if(!is.null(Xtel)){
+
+tel.gr<-    make.statespace(ll = statespace, buffer = 0.01, nx = 40)
+for(i in 1:max(Ytel[,3])){
+    dmat<- Ytel[,1:2][Ytel[,3]==i,]
+    dmat<- e2dist(dmat,tel.gr)
+        
+    }
+
+
 }
 
 }

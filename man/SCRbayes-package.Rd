@@ -8,7 +8,7 @@
 \description{
   Bayesian analysis of spatial capture-recapture models with a discrete
   state-space. The aim of this package is to provide more efficient
-  analysis than WinBUGS/JAGS and the R package "secr",
+  analysis than WinBUGS/JAGS and the R package "secr" for very large problems,
   at least for a limited class of models. 
 }
 \details{
@@ -42,7 +42,8 @@ large state-space grid, SCRbayes is less likely to run out of memory or
 take forever to produce estimates.  (2) SCRbayes has a limited number of
 features that secr doesn't have. It handles unknown sex information in
 models with sex-specific parameters by putting a prior distribution on
-the individual covariate "sex".  (3) In my view, SCRbayes packing and
+the individual covariate "sex".  SCRbayes INCORPORATES TELEMETRY DATA
+WITH SCR MODELS. (3) In my view, SCRbayes packing and
 handling of the data is easier and more intuitive than secr, although
 secr handles much more general models.  (4) SCRbayes produces the
 posterior distribution of the underlying point pattern of individual
@@ -50,8 +51,8 @@ activity centers. This is enormously useful for producing density maps,
 or estimates of population size in any arbitrary area. Note: summary
 functions for doing all of these things are in development so you have
 to do these things by yourself right now.
-Note: BUGS/JAGS and secr all have a host of advantages over SCRbayes but
-this package isn't about them. 
+Note: BUGS/JAGS and secr all have a host of advantages over SCRbayes
+related to the broader classes of models that they fit. 
 
 Discrete state-space: SCRbayes works strictly with a DISCRETE
 state-space grid. IF you can define your state-space by a rectangle or a
@@ -63,7 +64,7 @@ the state-space grid becomes enormous that secr starts to break down
 [note: this is subject to change we suppose].
 
 Future developments:
-(1) Multiple core capabilities will be developed. 
+(1) Multiple CPU core capabilities will be developed. 
 (2) Use the "dumprate" argument (not yet implemented) to get
 intermediate output for really huge problems.
 (3) Functions to assess convergence of the MCMC algorithm and how long
@@ -72,7 +73,7 @@ the MCMC algorithm should be run will be implemented soon.
 multi-site or multi-session models in any generality. However, certain
 specific cases can be analyzed by "stacking" the data sets. Details to
 follow. 
-
+(5) Choosing good starting values....
 
 Question: I NEED TO DO AN ANALYSIS OF SOME SCR DATA NOW GODDAMMIT, CAN YOU JUST
 CUT THE CRAP AND TELL ME WHAT TO DO?
@@ -122,12 +123,11 @@ believed to be "non-habitat" by a biologist.
 
 %%You should convert your statespace grid to an object of class
 %%"statespace" using the as.statespace() function.
-X%%XXXX NOT YET IMPLEMENTED XXXXXXXX
+%%XXXX NOT YET IMPLEMENTED XXXXXXXX
 
 If you don't have a state-space grid you can easily make one using the
 make.statespace function. See ?statespace or ?make.statespace. See the
 example below. 
-
 
 
 3. 

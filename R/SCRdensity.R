@@ -60,13 +60,10 @@ gridchain[j] = sum(centers==j)
 n.animals=gridchain/nrow(centers) # Avg Number of Animals at each point of statespace across MCMC samples. This is density per statespace pixel
 
 # Extract x- & y-ccordinates of statespace for image
-<<<<<<< HEAD
+
 ss.x <- sort(unique(obj$statespace$X_coord))
 ss.y <- sort(unique(obj$statespace$Y_coord))
-=======
-ss.x <- unique(obj$statespace$X_coord)
-ss.y <- unique(obj$statespace$Y_coord)
->>>>>>> f991676400c3732623affd3a715a5ae362ce8bed
+
 # Find Resolution of statespace
 ss.res = c(as.numeric(names(table(diff(ss.x)))),as.numeric(names(table(diff(ss.y)))))
 # Calculate density scaling factor
@@ -79,11 +76,10 @@ Dn = matrix(Dn, nrow = length(ss.y),ncol=length(ss.x),byrow=F)
 # Plot density as before
 par(mar=c(3,3,3,6))
 image(ss.x,ss.y,t(Dn),col=terrain.colors(ncolors))
-<<<<<<< HEAD
+
 image.scale(Dn,col=terrain.colors(ncolors))
-=======
-image.scale(out.dens,col=terrain.colors(ncolors))
->>>>>>> f991676400c3732623affd3a715a5ae362ce8bed
+##image.scale(out.dens,col=terrain.colors(ncolors))
+
 box()
 #        Return a data.frame with x-coords and y-coords and corresponding density.
 #         Notes that this output is slightly different from that produced above since
