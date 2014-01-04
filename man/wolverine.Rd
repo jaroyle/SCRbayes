@@ -93,11 +93,11 @@ grid<-cbind(wolverine$grid2,rep(1,nrow(wolverine$grid2)))
 wolv.scrdata<-scrData(TDF,EDF,grid,Xsex=wsex)
 
 ## now fit a model using the current development version of
-##   the fitting function. Probably should have theta = 1 here....
+##   the fitting function. With the 2 km grid the area per pixel is 4 km^2
 
-test<-SCRh.fn( wolv.scrdata,ni= 1200, burn=200, skip=2,nz=100,theta=.5,
+test<-SCRh.fn( wolv.scrdata,ni= 1200, burn=200, skip=2,nz=100,theta=1,
                Msigma=1, Mb=0, Msex=1, Msexsigma=1, 
-               coord.scale=5000, thinstatespace=4)
+               coord.scale=5000, area.per.pixel=4, thinstatespace=4)
 
 ## print a summary 
 print(test, digits=3)

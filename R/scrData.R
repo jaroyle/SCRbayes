@@ -98,7 +98,7 @@ cat("Error, sex needs to be binary",fill=TRUE)
 return(NULL)
 }
 
-if(is.null(    attributes(Ytel)$sex)){
+if(!is.null(Ytel) & is.null(    attributes(Ytel)$sex)){
 cat("Error: no sex information for telemetry data. Add this as an attribute.",fill=TRUE)
 return(NULL)
 }
@@ -117,13 +117,13 @@ return(NULL)
           cat("Ytel should have columns: X, Y, individual",fill=TRUE)
           return(NULL)
           }
-      
+
 sbar<- aggregate(Ytel[,1:2],by=list(Ytel[,3]),mean)
 attr(Ytel,"sbar")<- sbar[,2:3]
 
  if(is.null(Xtel)){
      # need average coordinate of each guy == home range center
-     #  need distance of each location TO that guy's home range center. Can compute normalizing constant directly     
+     #  need distance of each location TO that guy's home range center. Can compute normalizing constant directly
      #     1/(2pi sigmax sigmay)
 
         }
@@ -133,7 +133,7 @@ tel.gr<-    make.statespace(ll = statespace, buffer = 0.01, nx = 40)
 for(i in 1:max(Ytel[,3])){
     dmat<- Ytel[,1:2][Ytel[,3]==i,]
     dmat<- e2dist(dmat,tel.gr)
-        
+
     }
 
 

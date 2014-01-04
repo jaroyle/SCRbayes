@@ -2,7 +2,7 @@
 \alias{SCRh.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-conducts spatial capture recapture analysis 
+  conducts spatial capture recapture analysis .
 }
 \description{
   Fits SCR models to estimate density
@@ -12,20 +12,21 @@ conducts spatial capture recapture analysis
  using data augmentation.  
 }
 \usage{
-SCRh.fn(scrobj,ni = 1100, burn = 100, skip = 2, nz = 200,theta=2, Msigma= 1, Mb = 0, Msex = 0, Msexsigma = 0,
-Xeff = NULL, Xsex = NULL, coord.scale = 5000, thinstatespace = 1, maxNN = 20, dumprate = 1000)
+SCRh.fn(scrobj,ni = 1100, burn = 100, skip = 2, nz = 200,theta=2,
+Msigma= 1, Mb = 0, Msex = 0, Msexsigma = 0,
+coord.scale = 5000, thinstatespace = 1, maxNN = 20, dumprate = 1000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 \item{scrobj}{
 
-A list of type "scrobj" which has 5 elements "traps",
+A list of type "scrdata" which has 5 elements "traps",
   "captures", "statespace", "alive", and "Xd". You can use the function
   scrData to produce the object or you can create a list with the
   following elements:
 
   
-    traps: traps is a matrix containing a seq of numbers (1,2,3....j) where j= the
+traps: traps is a matrix containing a seq of numbers (1,2,3....j) where j= the
 number of traps in column 1.  Traps can be cameras, hair snares, or
 centerpoints of grid locations.  In columns two and three of the trap
 matrix are the X and Y or longitude and latitude of the trap locations,
@@ -33,7 +34,7 @@ and the survey dates in columns 4 to column 3+k where k=the number of
 survey dates. Each row of the matrix will contain either a 1 if the trap
 was operational on the survey date or a 0 if the trap was not operational.
 
- captures: a matrix
+captures: a matrix
 where the number of rows=the number of captures.  Each row contains 4
 columns labeled "session", "individual", "occasion" and "trapid". The
 order is not important. "individual" = the animal's unique integer
@@ -47,7 +48,7 @@ The data format is consistent with the
   secr package by Murray Efford. 
 
 
- statespace: contains the coordinate of potential centers of activity
+statespace: contains the coordinate of potential centers of activity
 including those from outside the trapping area, the statespace is a
 matrix where the X or longitudinal coordinate is in the first column and
 the Y or latitudinal coordinate is in the second column, and HABITAT= to
@@ -61,6 +62,7 @@ thought to be alive and alive[i,k]=0 if it is known dead.
 Xd = a single state-space covariate. A vector of length =
 nrows(statespace).
 
+.... other arguments ......
 }
 
 \item{ni}{ ni=number of MCMC iterations }
@@ -80,11 +82,6 @@ distribution of the parameter estimate of animal density should not be
 skewed or "truncated" by the number of augmented animals
  }
 
- \item{theta}{
-   the exponent parameter of the distance function. theta = 1
-  is exponential; theta=2 is Gaussian; theta = NA then theta is
-  estimated.
-  }
 
 \item{Msigma}{
 Msigma is an indicator variable that =1 if you are estimating the
@@ -100,20 +97,27 @@ Msex is an indicator variable that = 1 if detection probability is to be estimat
   \item{Msexsigma}{
 Msex sigma is an indicatore variable that = 1 if sigma is to be estimated seperately by sex, if Msexsigma =1 you must provide a vector Xsex
 }
-
-  \item{Xeff}{ Xeff=j by k matrix where k=the number of surveys and
-j=the number of traps.  For each row indicate the amount of survey
-effort conducted in that trap location during survey k, if effort was
-equal across all surveyed areas Xeff=NULL; If a trap x occasion was not
-sampled then any value can be used for effort because those elements of
-Xeff will not be extracted for the likelihood calculations. (the file
-"traps" contains information about which traps x occasions were sampled,
-see above).  }
-
-\item{Xsex}{ Xsex = a vector of length n where n= the
-number of animals; Xsex[i] is either a zero or 1 indicating the sex of
-animal [i] in the capture file, must be provided if Msex or Msexsigma=1
-} 
+\item{Mss}{
+Model indicator of statespace covariate. i.e., a covarate that affects
+density. 
+}
+\item{Meff}{
+Model indicator of trap-level "effort" covariate. The covariate should
+be packaged using scrData and it should be on the "log
+intensity" scale. i.e., if p = 1-exp(-effort*lambda0) then the covariate
+should be log(effort). 
+}
+\item{Mtel}{
+Model indicator enabling use of telemetry data. ..... more here. IF
+Mtel=1 then the RSF covariate is also used as a trap-level covariate....
+NOT YET IMPLEMENTED
+}
+   \item{theta}{
+   the exponent parameter of the distance function. theta = 1/2
+  is exponential; theta=1 is Gaussian; theta = NA then theta is
+  estimated. In SCRh.fn, the encounter model is specified by:
+   cloglog(p) = loglam0 - alpha1*dist(x,s)^(2*theta)
+  }
 
 \item{coord.scale}{ coord.scale scales the coordinate system by the
 input value.  The default is 5000 and will scale all X and Y locations
@@ -162,7 +166,7 @@ The model implemented by SCRh.fn is the Bernoulli encounter model with a
 hazard model for encounter probability, having the form:
  Pr(y=1) = 1-exp(-lam0*k(x,s))
 where
- k(x,s) = exp(-(1/(2*sigma^2))*dist(x,s)^(2/theta))
+ k(x,s) = exp(-(1/(2*sigma^2))*dist(x,s)^(2*theta))
 
 There are 3 parameters estimated: lam0, sigma, and theta. 
 For theta = 1/2, k(x,s) is an exponeital kernal and for theta = 1 it is a Gaussian kernel.  
@@ -226,7 +230,7 @@ Thompson, C. M., J. A. Royle, J. D. Gardner. in press. A framework for inference
   Journal of Wildlife Management.
 }
 \author{
-Andy Royle and Robin Russell 
+Andy Royle, Robin Russell, Joshua Goldberg 
 }
 \note{
 %%  ~~further notes~~
@@ -265,8 +269,7 @@ scrobj<-list(
     Xd=Xd)
 
 test<-SCRh.fn(scrobj,ni=220, burn=20, skip=2,nz=200,
-      Msigma=1, Mb=0, Msex=0, Msexsigma=0,
-      Xeff=NULL, Xsex=NULL, thinstatespace=4)
+      Msigma=1, Mb=0, Msex=0, Msexsigma=0, thinstatespace=4)
 
 ####
 ###
@@ -386,7 +389,9 @@ Xsex<-rbinom(length(unique(capture.sims$individual)),1,0.5)
 
 
 scrobj_harv<-scrData(traps=traps.sims, captures=capture.sims, statespace=ssanimal.sims, alive=Alive.sims, Xd=NULL) 
-sim.test1<-SCRh.fn(ni=200, burn=20,scrobj_harv,nz=1000, theta=1,thinstatespace=2, Msex=0, Xsex=NULL, Xeff=NULL)
+
+sim.test1<-SCRh.fn(scrobj_harv,ni=200, burn=20,nz=1000, theta=1,
+thinstatespace=2, Msex=0)
 
 
 

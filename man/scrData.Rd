@@ -61,12 +61,28 @@ whether individual were removed or not, without error.
 The matrix should be "nind x noccasions". 
 %%     ~~Describe \code{alive} here~~
 }
-\item{Xsex}{ sex variable }
+
+
+  \item{Xeff}{ Xeff=j by k matrix where k=the number of surveys and
+j=the number of traps.  For each row indicate the amount of survey
+effort conducted in that trap location during survey k, if effort was
+equal across all surveyed areas Xeff=NULL; If a trap x occasion was not
+sampled then any value can be used for effort because those elements of
+Xeff will not be extracted for the likelihood calculations. (the file
+"traps" contains information about which traps x occasions were sampled,
+see above).  }
+
+\item{Xsex}{ Xsex = a vector of length n where n= the
+number of animals; Xsex[i] is either a zero or 1 indicating the sex of
+animal [i] in the capture file, must be provided if Msex or Msexsigma=1
+} 
+
+
 \item{Xd}{
 A "density covariate" -- should be a vector of "ngrid x 1" where ngrid = nrow(statespace). 
 %%     ~~Describe \code{Xd} here~~
 }
-\item{Xeff}{ trap level covariate "effort" or habitat covariate }
+
 \item{Ytel}{
  Telemetry data on a sample of individuals. 
  This must have 3 columns:

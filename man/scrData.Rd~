@@ -69,14 +69,21 @@ A "density covariate" -- should be a vector of "ngrid x 1" where ngrid = nrow(st
 \item{Xeff}{ trap level covariate "effort" or habitat covariate }
 \item{Ytel}{
  Telemetry data on a sample of individuals. 
- This must be an "ngrix x Ntel" matrix of count frequencies where
- Ytel[j,i] is the frequency of telemetry fixes in pixel j for individual
- i. The number of ROWS of Ytel must be the same dimension as the
- state-space grid and therefore the telemetry data MUST BE
- pre-binned. Obviously covariates for the RSF model have to correspond
- to the state-space grid also. Right now these formatting requirements
-  are MANDATORY but only for expediency on my end
- of things. 
+ This must have 3 columns:
+
+ x-coord, y-coord, Individual
+
+ being the locations of each telemetry location and the individual ID.
+ Make sure individual ID is an integer from 1 to however many
+ individuals were telemetered.
+
+ If any models will be fitted that involve sex-specific sigma, then you
+ need to provide an attribute labeled "sex" to Ytel and this should be a
+ numeric vector of 0's and 1's. (same format as Xsex). 
+
+  It is assumed that the telemetry sample and the SCR sample of
+  individuals are independent and the model does not allow for them to
+  be reconciled. 
   }
   \item{Xtel}{
     habitat covariate for telemetry data. right now this has to be the
@@ -98,13 +105,12 @@ an object of class "scrdata"
 %% ~put references to the literature/web site here ~
 For the use of telemetry data see the paper:
 
-
 Royle, J.A., R.B. Chandler, C.C. Sun and A.K. Fuller. 
 (2013). Integrating resource selection information with spatial
 capture-recapture. Methods in Ecology and Evolution, 3:545-554.
 }
 \author{
-Andy Royle %%  ~~who you are~~
+Andy Royle, aroyle@usgs.gov %%  ~~who you are~~
 }
 \note{
 %%  ~~further notes~~
@@ -122,7 +128,7 @@ Andy Royle %%  ~~who you are~~
 
 ## The function is currently defined as
 
-library("SCRbayes")
+library(SCRbayes)
 data(lions)
 
 dimnames(captures.lions)<-
@@ -132,7 +138,9 @@ lion.scrdata <- scrData(traps.lions,captures.lions,statespace.lions)
 
 test <- SCRh.fn(lion.scrdata,ni=220, burn=20,
  skip=2,nz=200,Msigma=1, Mb=0, Msex=0, Msexsigma=0, 
- Xeff=NULL, Xsex=NULL, thinstatespace=2)
+ thinstatespace=2)
+
+
 
 
 
