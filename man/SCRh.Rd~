@@ -82,12 +82,6 @@ distribution of the parameter estimate of animal density should not be
 skewed or "truncated" by the number of augmented animals
  }
 
- \item{theta}{
-   the exponent parameter of the distance function. theta = 1/2
-  is exponential; theta=1 is Gaussian; theta = NA then theta is
-  estimated. In SCRh.fn, the encounter model is specified by:
-   cloglog(p) = loglam0 - alpha1*dist(x,s)^(2*theta)
-  }
 
 \item{Msigma}{
 Msigma is an indicator variable that =1 if you are estimating the
@@ -103,6 +97,27 @@ Msex is an indicator variable that = 1 if detection probability is to be estimat
   \item{Msexsigma}{
 Msex sigma is an indicatore variable that = 1 if sigma is to be estimated seperately by sex, if Msexsigma =1 you must provide a vector Xsex
 }
+\item{Mss}{
+Model indicator of statespace covariate. i.e., a covarate that affects
+density. 
+}
+\item{Meff}{
+Model indicator of trap-level "effort" covariate. The covariate should
+be packaged using scrData and it should be on the "log
+intensity" scale. i.e., if p = 1-exp(-effort*lambda0) then the covariate
+should be log(effort). 
+}
+\item{Mtel}{
+Model indicator enabling use of telemetry data. ..... more here. IF
+Mtel=1 then the RSF covariate is also used as a trap-level covariate....
+NOT YET IMPLEMENTED
+}
+   \item{theta}{
+   the exponent parameter of the distance function. theta = 1/2
+  is exponential; theta=1 is Gaussian; theta = NA then theta is
+  estimated. In SCRh.fn, the encounter model is specified by:
+   cloglog(p) = loglam0 - alpha1*dist(x,s)^(2*theta)
+  }
 
 \item{coord.scale}{ coord.scale scales the coordinate system by the
 input value.  The default is 5000 and will scale all X and Y locations

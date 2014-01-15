@@ -14,7 +14,7 @@
 \usage{
 SCRh.fn(scrobj,ni = 1100, burn = 100, skip = 2, nz = 200,theta=2,
 Msigma= 1, Mb = 0, Msex = 0, Msexsigma = 0,
-coord.scale = 5000, thinstatespace = 1, maxNN = 20, dumprate = 1000)
+coord.scale = 1000, thinstatespace = 1, maxNN = 20, dumprate = 1000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -120,8 +120,9 @@ NOT YET IMPLEMENTED
   }
 
 \item{coord.scale}{ coord.scale scales the coordinate system by the
-input value.  The default is 5000 and will scale all X and Y locations
-by 5000 }
+input value.  The default value of 1000 assumes input units are meters,
+so that X and Y coordinates are scaled by 
+1000 to produce units of km. }
 
 \item{area.per.pixel=1}{ Area of a state-space grid point. Default is 1
   unit of area. This is used in the conversion of population size N to

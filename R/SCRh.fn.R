@@ -8,7 +8,7 @@ Mss=0,
 Meff = 0,
 Mtel = 0,
 theta = 1,
-coord.scale = 5000, area.per.pixel = 1,
+coord.scale = 1000, area.per.pixel = 1,
     thinstatespace = 1, maxNN = 20, dumprate = 1000)
 {
     call <- match.call()
@@ -33,7 +33,7 @@ coord.scale = 5000, area.per.pixel = 1,
         loglik.tel<-function(bsigma,Ytel,Msexsigma){
             sbar<-attributes(Ytel)$sbar
             sex.tel<-attributes(Ytel)$sex
-            
+
             sigma <- sqrt(1/(2*bsigma) )
             if(length(bsigma)==1){
 return(            sum(    dnorm(Ytel[,1],sbar[,1][Ytel[,3]],sigma,log=TRUE) +
@@ -47,8 +47,8 @@ return(            sum(    dnorm(Ytel[,1],sbar[,1][Ytel[,3]],sigma,log=TRUE) +
         }
         ##tel.gr<-    make.statespace(ll = statespace, buffer = 0.01, nx = 40)
 
-    
-    
+
+
     }
 
 if(!is.null(Xtel)){
@@ -70,6 +70,14 @@ if(!is.null(Xtel)){
     }
     Y <- captures
     traplocs <- traps[, 2:3]
+
+    xrange <- max(traplocs[,1])-min(traplocs[,1])
+    yrange <- max(traplocs[,2])-min(traplocs[,2])
+if( (xrange + yrange) < coord.scale)
+    {
+cat("coord.scale appears to be too large, check this out, maybe set to 1",fill=TRUE)
+         return(0)
+    }
     MASK <- as.matrix(traps[, 4:ncol(traps)])
     nind <- max(Y[, 2])
     T <- dim(MASK)[2]
@@ -237,9 +245,9 @@ if(!is.null(Xtel)){
     c1 <- (S[indid, 1] - trapgridbig[, 1])^2
     c2 <- (S[indid, 2] - trapgridbig[, 2])^2
     gof.new <- gof.data <- rep(NA, (ni - burn)/skip)
-    out <- matrix(NA, nrow = (ni - burn)/skip, ncol = 15)
+    out <- matrix(NA, nrow = (ni - burn)/skip, ncol = 16)
     dimnames(out) <- list(NULL, c("bsigma", "sigma", "bsigma2",
-        "sigma2", "lam0", "beta.behave", "beta1(effort)", "beta.sex",
+        "sigma2", "loglam0","lam0", "beta.behave", "beta1(effort)", "beta.sex",
         "psi", "psi.sex", "Nsuper", "theta", "beta.density",
         "D","beta(habitat)"))
     zout <- matrix(NA, nrow = (ni - burn)/skip, ncol = M)
@@ -266,7 +274,7 @@ if(!is.null(Xtel)){
         llvector.new <- lik.fn(lpc, y1)
         LM1[aliveid == 1] <- llvector.new
         LM2[aliveid == 1] <- llvector
-        
+
         if (runif(1) < exp(sum(((LM1[z == 1, ] - LM2[z == 1,
             ]) %*% ones)))) {
             loglam0 <- loglam0c
@@ -275,7 +283,7 @@ if(!is.null(Xtel)){
             lp <- lpc
             LM2 <- LM1
         }
-        
+
         if (update.theta) {
             lp <- loglam0 + Mb * beta.behave * prevcap - lp.sigma +
                 Meff* beta1 * Xeff + Msex * beta.sex * Xsex[indid]
@@ -310,9 +318,9 @@ if(!is.null(Xtel)){
                 Meff*beta1 * Xeff + Msex * beta.sex * Xsex[indid]
             llvector.new <- lik.fn(lpc, y1)
             LM1[aliveid == 1] <- llvector.new
-            
-            mh.ratio<- 
-            exp(sum(((LM1[z == 1, ] - LM2[z ==1, ]) %*% ones)) + 
+
+            mh.ratio<-
+            exp(sum(((LM1[z == 1, ] - LM2[z ==1, ]) %*% ones)) +
                 Mtel*(loglik.tel(bsigmac,Ytel,Msexsigma) - loglik.tel(bsigma,Ytel,Msexsigma))  )
             if (runif(1) < mh.ratio){
                 lp.sigma <- lp.sigmac
@@ -335,10 +343,10 @@ if(!is.null(Xtel)){
             llvector.new <- lik.fn(lpc, y1)
             LM1[aliveid == 1] <- llvector.new
             mh.ratio<-             exp(sum(((LM1[z == 1, ] - LM2[z ==
-                                             1, ]) %*% ones)) + 
+                                             1, ]) %*% ones)) +
                Mtel*(loglik.tel(bsigmac,Ytel,Msexsigma) - loglik.tel(bsigma,Ytel,Msexsigma))  )
-            
-            if (runif(1) < mh.ratio){ 
+
+            if (runif(1) < mh.ratio){
                 lp.sigma <- lp.sigmac
                 bsigma <- bsigmac
                 llvector <- llvector.new
@@ -354,7 +362,7 @@ if(!is.null(Xtel)){
                 Meff*beta1 * Xeff + Msex * beta.sex * Xsex[indid]
             llvector.new <- lik.fn(lpc, y1)
             LM1[aliveid == 1] <- llvector.new
- mh.ratio<-  exp(sum(((LM1[z == 1, ] - LM2[z ==1, ]) %*% ones)) + 
+ mh.ratio<-  exp(sum(((LM1[z == 1, ] - LM2[z ==1, ]) %*% ones)) +
              Mtel*(loglik.tel(bsigmac,Ytel,Msexsigma) - loglik.tel(bsigma,Ytel,Msexsigma))  )
             if (runif(1) < mh.ratio) {
                 lp.sigma <- lp.sigmac
@@ -525,7 +533,7 @@ if(!is.null(Xtel)){
             zout[m, ] <- z
             Sout[m, ] <- centers
             out[m, ] <- c(bsigmatmp[1], sigmatmp[1], bsigmatmp[2],
-                sigmatmp[2], lam0, beta.behave, beta1, beta.sex,
+                sigmatmp[2], log(lam0), lam0, beta.behave, beta1, beta.sex,
                 psi, psi.sex, sum(z), theta, beta.den, density,NA)
             print(out[m, ])
             if (m%%dumprate == 0) {
@@ -535,7 +543,7 @@ if(!is.null(Xtel)){
     }
     parms.2.report <- c(TRUE, TRUE,
                         Msexsigma == 1,
-                        Msexsigma == 1, TRUE, Mb == 1,
+                        Msexsigma == 1, TRUE, TRUE, Mb == 1,
                         Meff ==1, Msex == 1, TRUE, Msex == 1,
         TRUE, update.theta, Mss == 1, TRUE,FALSE)
     out <- list(mcmchist = out, G = G, Gunscaled = Gunscaled,
