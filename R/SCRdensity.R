@@ -1,11 +1,18 @@
-SCRdensity <-
-function(obj,nx=30,ny=30,Xl=NULL,Xu=NULL,Yl=NULL,Yu=NULL,
-scalein=1,scaleout=1000000*100,ncolors=10, opt.ss = FALSE){
-## 1000000 scaleout puts density in units per km^2
-## multiplied by 100 is units per 100 km^2
-## assumes units input are meters.
+SCRdensity <-function(obj,nx=30,ny=30,Xl=NULL,Xu=NULL,Yl=NULL,Yu=NULL,
+scalein=1,scaleout=1,ncolors=10, opt.ss = FALSE){
+## scalein = size of pixel in area you care about
+##
+##
+### Jan 29 2014 -- Andy dislikes the scalein and scaleout business
+### trying to do something about that
+##
+##
+##  default units is "bears per pixel" if opt.ss = TRUE
+
+
 
 if(any(class(obj)=="scrfit")){
+
 if (!opt.ss){
 S<-obj$Sout
 ss<-obj$statespace
@@ -33,9 +40,8 @@ Sxout<-cut(Sxout[z==1],breaks=xg)
 Syout<-cut(Syout[z==1],breaks=yg)
 Dn<-table(Sxout,Syout)/niter  # Dn = avg # guy (posterior)
 area<-  (yg[2]-yg[1])*(xg[2]-xg[1])*scalein # this is in sq km now
-
 Dn<- (Dn/area)*scaleout   # now wolverines per 100 km
-cat("mean: ",mean(Dn),fill=TRUE)
+cat("sum: ",sum(Dn),fill=TRUE)
 par(mar=c(3,3,3,6))
 image(xg,yg,Dn,col=terrain.colors(ncolors))
 image.scale(Dn,col=terrain.colors(ncolors))
@@ -60,36 +66,58 @@ gridchain[j] = sum(centers==j)
 n.animals=gridchain/nrow(centers) # Avg Number of Animals at each point of statespace across MCMC samples. This is density per statespace pixel
 
 # Extract x- & y-ccordinates of statespace for image
-
-ss.x <- sort(unique(obj$statespace$X_coord))
-ss.y <- sort(unique(obj$statespace$Y_coord))
-
+ss.x <- sort(unique(obj$statespace[,1]))
+ss.y <- sort(unique(obj$statespace[,2]))
 # Find Resolution of statespace
 ss.res = c(as.numeric(names(table(diff(ss.x)))),as.numeric(names(table(diff(ss.y)))))
 # Calculate density scaling factor
-out.res = scaleout/prod(ss.res)*scalein
+####out.res = scaleout/prod(ss.res)*scalein
 # Scale density
-Dn = n.animals*out.res
-cat("mean: ",mean(Dn),fill=TRUE)
-# Make density into a matrix
+Dn = n.animals*scaleout  ####*out.res
+
+cat("sum: ",sum(Dn),fill=TRUE)
+
+ssp<-
+function (x, y, add = TRUE, cx = 1)
+{
+    nc <- as.numeric(cut(y, 20))
+    if (!add)
+        plot(x, pch = " ")
+    points(x, pch = 15, col = terrain.colors(20)[nc], cex = cx)
+    image.scale(y, col = terrain.colors(20))
+}
+
+
+### Should use raster package function rasterFromXYZ here I think.
+
+ssp(obj$statespace[,1:2][obj$statespace[,3]==1,],Dn,add=FALSE,cx=1)
+###title("local density (bears / 1000)")
+
+if(1==2){
+## This code doesn't make sense if the state-space is not regular
+    # Make density into a matrix
 Dn = matrix(Dn, nrow = length(ss.y),ncol=length(ss.x),byrow=F)
 # Plot density as before
 par(mar=c(3,3,3,6))
 image(ss.x,ss.y,t(Dn),col=terrain.colors(ncolors))
-
 image.scale(Dn,col=terrain.colors(ncolors))
 ##image.scale(out.dens,col=terrain.colors(ncolors))
-
 box()
-#        Return a data.frame with x-coords and y-coords and corresponding density.
-#         Notes that this output is slightly different from that produced above since
-#        the density and coordinates are of the same dimension.
-#        Maybe conceptually easier for user to handle? Instead of the unique x and y values.
-
-return(data.frame(X_coord=obj$statespace$X_coord, Y_coord=obj$statespace$Y_coord,Dn=c((Dn))))
 }
-}else{
-# below lines of code for SCRbook examples
+#Return a data.frame with x-coords and y-coords and corresponding density.
+#Notes that this output is slightly different from that produced above since
+#the density and coordinates are of the same dimension.
+#Maybe conceptually easier for user to handle? Instead of the unique x and y values.
+#return(data.frame(X_coord=obj$statespace$X_coord, Y_coord=obj$statespace$Y_coord,Dn=c((Dn))))
+return(cbind(obj$statespace,Dn))
+
+}
+
+}
+else{
+###
+### # below lines of code for SCRbook examples
+
 Sxout<-obj$Sx
 Syout<-obj$Sy
 z<-obj$z
@@ -119,3 +147,4 @@ image.scale(Dn,col=terrain.colors(ncolors))
 box()
 return(list(grid=cbind(xg,yg),Dn=Dn))
 }
+
