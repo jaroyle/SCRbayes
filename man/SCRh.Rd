@@ -12,8 +12,10 @@
  using data augmentation.  
 }
 \usage{
-SCRh.fn(scrobj,ni = 1100, burn = 100, skip = 2, nz = 200,theta=2,
+SCRh.fn(scrobj,ni = 1100, burn = 100, skip = 2, nz = 200,
 Msigma= 1, Mb = 0, Msex = 0, Msexsigma = 0,
+Mss=0, Meff=0, Mtel=0,
+theta=1,
 coord.scale = 1000, thinstatespace = 1, maxNN = 20, dumprate = 1000)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -104,8 +106,10 @@ density.
 \item{Meff}{
 Model indicator of trap-level "effort" covariate. The covariate should
 be packaged using scrData and it should be on the "log
-intensity" scale. i.e., if p = 1-exp(-effort*lambda0) then the covariate
-should be log(effort). 
+intensity" scale. i.e., if p = 1-exp(-(effort^beta)*lambda0) then the cloglog
+transform of this yields cloglog(p) = beta*log(effort) + log(lambda0)
+so your covariate of effort should be X = log(effort) where effort is a
+positive number.
 }
 \item{Mtel}{
 Model indicator enabling use of telemetry data. ..... more here. IF

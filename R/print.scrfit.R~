@@ -1,6 +1,6 @@
 print.scrfit <-
 function(x, ...) {
-mcmc<- x$out
+mcmc<- x$mcmchist
 p2k<- x$parms2report
 smy<-function(v){
      c(mean=mean(v),SD=sqrt(var(v)), quantile(v,c(0.025,0.50,0.975)))
