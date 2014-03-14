@@ -21,13 +21,13 @@ function(traps,captures,statespace,alive=NULL,
     ### column 3 can be "period" occasion sample etc
     ## column 4 can be trap trapid trxxxx
 
-    if(ncol(captures)==3)
+    if(ncol(captures)==3){
  session=rep(1,nrow(captures))
-else
+}else{
  session<- captures[,"session"]
 individual<-captures[,"individual"]
 occasion<-captures[,"occasion"]
-trapid<- captures[,"trapid"]
+trapid<- captures[,"trapid"]}
 captures<-cbind(session=session,individual=individual,occasion=occasion,trapid=trapid)
 
 
@@ -98,9 +98,11 @@ cat("Error, sex needs to be binary",fill=TRUE)
 return(NULL)
 }
 
-if(!is.null(Ytel) & is.null(    attributes(Ytel)$sex)){
+if(!is.null(Ytel)){ 
+	if(is.null(    attributes(Ytel)$sex)){
 cat("Error: no sex information for telemetry data. Add this as an attribute.",fill=TRUE)
 return(NULL)
+}
 }
 
 
