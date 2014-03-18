@@ -64,7 +64,9 @@ FALSE (default) the binning method is used.
   %% ~put references to the literature/web site here ~
 }
 \author{
-Andy Royle, aroyle@usgs.gov %%  ~~who you are~~
+Andy Royle, aroyle@usgs.gov 
+Joshua Goldberg, joshua.goldberg@umontana.edu
+%%  ~~who you are~~
 }
 \note{
 %%  ~~further notes~~
