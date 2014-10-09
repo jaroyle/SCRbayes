@@ -16,16 +16,18 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Msex=0, Msexsigma=0, Xsex = NUL
 	
 	#Some basic error checking for sex covariates
 	if (Msex==1|Msexsigma==1){
-		if(!is.numeric(Xsex)) {
-			cat("Error: Please supply a numeric value for Xsex", fill=T)
-			return()}
-		if (!(length(Xsex) %in% c(1))){
-			cat("Error: Sex should take on a single value for prediction", fill=T)
-			return()
-		}
-		if(Xsex<0|Xsex>1){
-			cat("Error: Value of Xsex should be between 0 and 1")
-			return()
+		if (!is.null(Xsex)){
+			if(!is.numeric(Xsex)) {
+				cat("Error: Please supply a numeric value for Xsex", fill=T)
+				return()}
+			if (!(length(Xsex) %in% c(1))){
+				cat("Error: Sex should take on a single value for prediction", fill=T)
+				return()
+			}
+			if(Xsex<0|Xsex>1){
+				cat("Error: Value of Xsex should be between 0 and 1")
+				return()
+			}
 		}
 	}
 	
@@ -91,14 +93,15 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Msex=0, Msexsigma=0, Xsex = NUL
 			
 			# n.animals.iter = array(n.animals.iter,c(ifelse(is.matrix(n.animals.iter), nrow(n.animals.iter),1),ncol(gridchain)))
 		}
-	}
+	}else{
 	
 	# If iter is a numeric giving which iterations of the chain to work with...
 	if (any(is.numeric(iter))){
 		param.values = obj$mcmchist[iter,]
-		
+		param.values = array(param.values,c(ifelse(is.matrix(param.values),nrow(param.values),1),ncol(obj$mcmchist)))
+		colnames(param.values) = colnames(obj$mcmchist)
 		# Compute activity centers for each iteration of the chain
-		centers= (obj$Sout[iter,]*obj$zout[iter,])
+		centers= matrix(obj$Sout[iter,]*obj$zout[iter,], nrow=length(iter),ncol=ncol(obj$Sout))
 		gridchain = matrix(nrow=nrow(centers),ncol=nrow(obj$statespace))
 
 		for (k in 1:nrow(centers)){
@@ -125,6 +128,7 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Msex=0, Msexsigma=0, Xsex = NUL
 			}
 			
 		n.animals.iter = gridchain
+	}
 	}
 	# String together necessary info to be passed to internal function (below)
 	inputs = list("obj"=obj,"param.values"=param.values, "n.animals.iter"=n.animals.iter,"SO"=SO, "Mb"=Mb, "Mbvalue"=Mbvalue, "Msex"=Msex, "Msexsigma"=Msexsigma, "Xsex"=Xsex, "Mss"=Mss,"Xd"=Xd,"Meff"=Meff, "Xeff" = Xeff, "scalein"=scalein)
@@ -182,7 +186,7 @@ SCR.area = function(obj, SO, Mb=0, Mbvalue=NULL, Msex=0, Msexsigma=0, Xsex = NUL
 		    # Compute the linear predictor components
 		    lp.eff =  ifelse(Meff==0,0,param.values[i,"beta1(effort)"]*Xeff)
 		    lp.behav = ifelse(Mb==0,0,Mbvalue*param.values[i,"beta.behave"])
-		    lp.dens = ifelse(Meff==0,0,(Xd[obj$statespace$X_coord==x&obj$statespace$Y_coord==y]*param.values[i,"beta.density"]-(log(sum(exp(Xd*param.values[i,"beta.density"]))))))
+		    lp.dens = ifelse(Mss==0,0,(Xd[obj$statespace$X_coord==x&obj$statespace$Y_coord==y]*param.values[i,"beta.density"]-(log(sum(exp(Xd*param.values[i,"beta.density"]))))))
 		    # Add all the lps, convert to probability of capture in a trap
 		    prob.cap <-1 - exp(-exp(loglam0-sigma*(temp.dist/coord.scale)^(2*param.values[i,"theta"])+lp.eff+lp.behav+lp.dens))
 		    # Store probability of capture in ANY trap 
