@@ -25,9 +25,10 @@ function(traps,captures,statespace,alive=NULL,
  session=rep(1,nrow(captures))
 }else{
  session<- captures[,"session"]
+}
 individual<-captures[,"individual"]
 occasion<-captures[,"occasion"]
-trapid<- captures[,"trapid"]}
+trapid<- captures[,"trapid"]
 captures<-cbind(session=session,individual=individual,occasion=occasion,trapid=trapid)
 
 
